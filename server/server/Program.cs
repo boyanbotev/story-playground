@@ -9,8 +9,11 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
-app.MapGet("/", () => "Hello World!");
+app.MapGet("/", () =>
+{  
+    return "Hello World!";
+});
 
 app.Run();
