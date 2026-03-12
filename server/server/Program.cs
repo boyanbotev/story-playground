@@ -1,6 +1,8 @@
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<ILLMService, OllamaService>();
 
 var app = builder.Build();
 
@@ -11,9 +13,6 @@ if (app.Environment.IsDevelopment())
 
 //app.UseHttpsRedirection();
 
-app.MapGet("/", () =>
-{  
-    return "Hello World!";
-});
+app.MapStoryEndpoints();
 
 app.Run();
