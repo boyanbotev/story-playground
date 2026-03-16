@@ -1,47 +1,52 @@
 using Microsoft.AspNetCore.Mvc;
 using server.models;
 using server.models.DTO;
+using server.Services;
+using System.Net;
 
 public static class StoryEndpoints
 {
-    public static void MapStoryEndpoints(this WebApplication app, Settings settings)
+    public static void MapStoryEndpoints(this WebApplication app)
     {
-
-        app.MapPost("/progress", async (ILLMService lLMService, [FromBody] ProgressRequest progressRequest) =>
+        app.MapPost("/stories", async ([FromBody] AddStoryRequest addStoryRequest,  IStoryService storyService) =>
         {
-            bool isValid = await lLMService.ValidateUserAction(progressRequest.UserAction, progressRequest.StoryStructure, progressRequest.SummarySoFar);
-            if (!isValid)
+            var result = await storyService.AddStory(addStoryRequest);
+            switch(result)
             {
-                return "Invalid User Action";
+                case AddResult.Success:
+                    return HttpStatusCode.Created;
+                case AddResult.AlreadyExists:
+                    return HttpStatusCode.Conflict;
+                case AddResult.Invalid:
+                    return HttpStatusCode.BadRequest;
+                default:
+                    return HttpStatusCode.InternalServerError;
             }
+        });
 
-            string steeringInstruction = progressRequest.TurnsRemaining switch
+        app.MapDelete("/stories/{id}", async (int id, IStoryService storyService) =>
+        {
+            var result = await storyService.DeleteStory(id);
+            switch(result)
             {
-                0 => $"CRITICAL INSTRUCTION: The user MUST now experience this exact event: '{progressRequest.NextNode}'. Make it happen in this response.",
-                
-                <= 2 => $"CRITICAL INSTRUCTION: Transition the scene to set up this upcoming event: '{progressRequest.NextNode}'. DO NOT let the event actually happen yet. Just put the pieces in place based on the User Action.",
-                
-                _ => $"CRITICAL INSTRUCTION: Focus ENTIRELY on the User Action. Do NOT introduce any new characters or major events yet."
-            };
+                case RemoveResult.Success:
+                    return HttpStatusCode.OK;
+                case RemoveResult.DoesNotExist:
+                    return HttpStatusCode.NotFound;
+                default:
+                    return HttpStatusCode.InternalServerError;
+            }
+        });
 
-            string upcomingEventContext = progressRequest.TurnsRemaining <= 2 
-                ? $"\nUpcoming Event to foreshadow: {progressRequest.NextNode}" 
-                : "";
+        app.MapGet("stories", async (IStoryService storyService) =>
+        {
+            var stories = await storyService.GetStories();
+            return Results.Ok(stories);
+        });
 
-            string prompt = $@"{settings.SystemPrompt}
-Story Style Guide: {settings.StyleGuide}
-
-Summary of story so far: {progressRequest.SummarySoFar}
-{upcomingEventContext}
-
-=== CURRENT TURN ===
-User Action: {progressRequest.UserAction}
-{steeringInstruction}
-
-Write the next 40-70 words now:";
-
-            Console.WriteLine("Prompt:\n" + prompt);
-            return await lLMService.Generate(prompt);
+        app.MapPost("/progress", async (ILLMService lLMService, IStoryService storyService, [FromBody] ProgressRequest progressRequest, Settings settings) =>
+        {
+            return await storyService.ProgressStory(progressRequest);
         });
     }
 }
