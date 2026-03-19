@@ -62,6 +62,10 @@ public class StoryService : IStoryService
         }
         return AddResult.Success;
     }
+    public async Task<Story> GetStory(int id)
+    {
+        return await db.Stories.FindAsync(id);
+    }
 
     public async Task<RemoveResult> DeleteStory(int id)
     {

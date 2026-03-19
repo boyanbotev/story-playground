@@ -38,6 +38,12 @@ public static class StoryEndpoints
             }
         });
 
+        app.MapGet("/stories/{id}", async (int id, IStoryService storyService) =>
+        {
+            var story = await storyService.GetStory(id);
+            return Results.Ok(story);
+        });
+
         app.MapGet("stories", async (IStoryService storyService) =>
         {
             var stories = await storyService.GetStories();
