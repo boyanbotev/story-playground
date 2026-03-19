@@ -1,20 +1,45 @@
-import { useRef } from "react";
+import { useState } from "react";
 import { Story } from "../dto/Story";
 import { postAddStory } from "../requests/postAddStory";
+import { StoryNode } from "../dto/StoryNode";
 
 export const Add = () => {
-    const name = useRef<HTMLInputElement | null>(null);
-    const structure = useRef<HTMLInputElement | null>(null);
+    const [name, setName] = useState("");
+    const [structure, setStructure] = useState("");
+    const [nodes, setNodes] = useState([{ content: "", turns: 0 }]);
 
-    const submitStory = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    const submitStory = async (e: React.SubmitEvent) => {
         e.preventDefault();
-        
-        const story = new Story(name.current!.value, structure.current!.value, []);
+
+        const story = new Story(
+            name,
+            structure,
+            nodes.map(n => new StoryNode(n.content, n.turns))
+        );
+
         await postAddStory(story);
 
-        name.current!.value = "";
-        structure.current!.value = "";
-    }
+        setName("");
+        setStructure("");
+        setNodes([{ content: "", turns: 0 }]);
+    };
+
+    const addNode = () => {
+        setNodes([...nodes, { content: "", turns: 0 }]);
+    };
+
+    const removeNode = (index: number) => {
+        setNodes(nodes.filter((_, i) => i !== index));
+    };
+
+    const updateNode = (index: number, field: "content" | "turns", value: string) => {
+        const updated = [...nodes];
+        updated[index] = {
+            ...updated[index],
+            [field]: field === "turns" ? Number(value) : value
+        };
+        setNodes(updated);
+    };
 
     return (
         <div>
@@ -22,18 +47,41 @@ export const Add = () => {
             <form className="form" onSubmit={submitStory}>
                 <label>
                     Story Name:
-                    <input type="text" name="name" ref={name} />
+                    <input value={name} onChange={e => setName(e.target.value)} />
                 </label>
-               
-               <label>
+                
+                <label>
                    Structure:
-                   <input type="text" name="structure" ref={structure}/>
+                   <input value={structure} onChange={e => setStructure(e.target.value)} />
                </label>
-               <label>
-                   Nodes:
-                   // TODO: add nodes
-                   
-               </label>
+
+                <h3>Nodes</h3>
+
+                {nodes.map((node, i) => (
+                    <div key={i}>
+                        <label>
+                            Content:
+                            <input
+                                placeholder="Content"
+                                value={node.content}
+                                onChange={e => updateNode(i, "content", e.target.value)}
+                            />
+                        </label>
+                        <label>
+                            Turns:
+                            <input
+                                type="number"
+                                placeholder="Turns"
+                                value={node.turns}
+                                onChange={e => updateNode(i, "turns", e.target.value)}
+                            />
+                        </label>
+
+                        <button type="button" onClick={() => removeNode(i)}>Remove</button>
+                    </div>
+                ))}
+
+                <button type="button" onClick={addNode}>Add Node</button>
                 <button type="submit">Submit</button>
             </form>
         </div>

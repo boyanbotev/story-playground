@@ -33,7 +33,7 @@ public class StoryService : IStoryService
 
     public async Task<Story[]> GetStories()
     {
-        return await db.Stories.AsNoTracking().ToArrayAsync();
+        return await db.Stories.Include(s => s.Nodes).AsNoTracking().ToArrayAsync();
     }
 
     public async Task<AddResult> AddStory(AddStoryRequest addRequest)
