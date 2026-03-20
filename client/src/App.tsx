@@ -24,8 +24,7 @@ function App() {
           path: "stories",
           Component: Stories,
             loader: async () => {
-            let storiesJson = await fetchStories();
-            const stories = await JSON.parse(storiesJson);
+            let stories = await fetchStories();
             return { stories };
           }
         },
@@ -38,14 +37,18 @@ function App() {
           Component: Edit,
           loader: async ({ params }) => {
             if (params.storyId == null) return;
-            let storyJson = await fetchStory(parseInt(params.storyId));
-            const story = await JSON.parse(storyJson);
+            let story = await fetchStory(parseInt(params.storyId));
             return { story };
           }
         },
         {
           path: "stories/:storyId/play",
           Component: Game,
+          loader: async ({ params }) => {
+            if (params.storyId == null) return;
+            let story = await fetchStory(parseInt(params.storyId));
+            return { story };
+          }
         }
       ]
     },
