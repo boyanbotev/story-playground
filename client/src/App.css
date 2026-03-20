@@ -32,3 +32,22 @@ nav {
   border-bottom: 1px solid #ccc;
   justify-content: center;
 }
+
+.node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #ccc;
+  border-radius: 50px;
+  width: 500px;
+}
+
+.nodes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}

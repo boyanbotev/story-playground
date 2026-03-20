@@ -19,6 +19,12 @@ public enum RemoveResult
     DoesNotExist
 }
 
+public enum UpdateResult
+{
+    Success,
+    DoesNotExist
+}
+
 public class StoryService : IStoryService
 {
     public StoryContext db { get; }
@@ -64,7 +70,34 @@ public class StoryService : IStoryService
     }
     public async Task<Story> GetStory(int id)
     {
-        return await db.Stories.FindAsync(id);
+        return await db.Stories.Include(s => s.Nodes).AsNoTracking().FirstOrDefaultAsync(s => s.Id == id);
+    }
+
+    public async Task<UpdateResult> UpdateStory(int id, UpdateStoryRequest updateStoryRequest)
+    {
+        var story = await db.Stories.Include(s => s.Nodes).FirstOrDefaultAsync(s => s.Id == id);
+
+        if (story == null)
+        {
+            return UpdateResult.DoesNotExist;
+        }
+
+        story.Name = updateStoryRequest.Name;
+        story.Structure = updateStoryRequest.Structure;
+
+        story.Nodes.Clear();
+        foreach (var node in updateStoryRequest.Nodes)
+        {
+            var storyNode = new StoryNode
+            {
+                Content = node.Content,
+                Turns = node.Turns,
+            };
+            story.Nodes.Add(storyNode);
+        }
+
+        await db.SaveChangesAsync();
+        return UpdateResult.Success;
     }
 
     public async Task<RemoveResult> DeleteStory(int id)

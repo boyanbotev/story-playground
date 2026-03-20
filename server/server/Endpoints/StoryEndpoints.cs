@@ -50,6 +50,20 @@ public static class StoryEndpoints
             return Results.Ok(stories);
         });
 
+        app.MapPut("/stories/{id}", async (int id, [FromBody] UpdateStoryRequest updateStoryRequest, IStoryService storyService) =>
+        {
+            var result = await storyService.UpdateStory(id, updateStoryRequest);
+            switch(result)
+            {
+                case UpdateResult.Success:
+                    return HttpStatusCode.OK;
+                case UpdateResult.DoesNotExist:
+                    return HttpStatusCode.NotFound;
+                default:
+                    return HttpStatusCode.InternalServerError;
+            }
+        });
+
         app.MapPost("/progress", async (ILLMService lLMService, IStoryService storyService, [FromBody] ProgressRequest progressRequest, Settings settings) =>
         {
             return await storyService.ProgressStory(progressRequest);
