@@ -58,7 +58,8 @@ function App() {
           path: "stories",
           Component: Stories,
             loader: async () => {
-            let stories = await fetchStories();
+            let storiesJson = await fetchStories();
+            const stories = await JSON.parse(storiesJson);
             return { stories };
           }
         },
