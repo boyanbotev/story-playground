@@ -15,7 +15,9 @@ export const StoryCard = ({ story }: { story: StoryData }) => {
     return (
         <div>
             <h2>{story.name}</h2>
-            <p>{story.structure}</p>
+            <p>Story synopisis: {story.structure}</p>
+            <p>Starting Summary: {story.startingSummary}</p>
+            <p>Introduction: {story.introduction}</p>
             <div className="nodes">{story.nodes.map(n => <NodeCard key={n.id} node={n} />)}</div>
             <NavLink to={`/stories/${story.id}`}>Edit</NavLink>
             <NavLink to={`/stories/${story.id}/play`}>Play</NavLink>

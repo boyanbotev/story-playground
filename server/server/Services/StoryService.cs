@@ -84,6 +84,8 @@ public class StoryService : IStoryService
 
         story.Name = updateStoryRequest.Name;
         story.Structure = updateStoryRequest.Structure;
+        story.StartingSummary = updateStoryRequest.StartingSummary;
+        story.Introduction = updateStoryRequest.Introduction;
 
         story.Nodes.Clear();
         foreach (var node in updateStoryRequest.Nodes)
@@ -116,13 +118,16 @@ public class StoryService : IStoryService
 
     public async Task<object> ProgressStory(ProgressRequest progressRequest)
     {
-        bool isValid = await ValidateUserAction(progressRequest.UserAction, progressRequest.StoryStructure, progressRequest.SummarySoFar);
+        var story = await GetStory(progressRequest.StoryId);
+
+        bool isValid = await ValidateUserAction(progressRequest.UserAction, story.Structure, progressRequest.SummarySoFar);
         if (!isValid)
         {
             return "Invalid User Action";
         }
 
-        string prompt = CreateProgressPrompt(progressRequest);
+        var nextNode = story.Nodes[progressRequest.NodeIndex].Content;
+        string prompt = CreateProgressPrompt(progressRequest, nextNode);
 
         Console.WriteLine("Prompt:\n" + prompt);
         string storyText = await LLMService.Generate(prompt);
@@ -151,19 +156,19 @@ public class StoryService : IStoryService
         return isTrue.ToLower().Contains("yes");
     }
 
-    private string CreateProgressPrompt(ProgressRequest progressRequest)
+    private string CreateProgressPrompt(ProgressRequest progressRequest, string nextNode)
     {
         string steeringInstruction = progressRequest.TurnsRemaining switch
         {
-            0 => $"CRITICAL INSTRUCTION: The user MUST now experience this exact event: '{progressRequest.NextNode}'. Make it happen in this response.",
+            0 => $"CRITICAL INSTRUCTION: The user MUST now experience this exact event: '{nextNode}'. Make it happen in this response.",
 
-            <= 2 => $"CRITICAL INSTRUCTION: Transition the scene to set up this upcoming event: '{progressRequest.NextNode}'. DO NOT let the event actually happen yet. Just put the pieces in place based on the User Action.",
+            <= 2 => $"CRITICAL INSTRUCTION: Transition the scene to set up this upcoming event: '{nextNode}'. DO NOT let the event actually happen yet. Just put the pieces in place based on the User Action.",
 
             _ => $"CRITICAL INSTRUCTION: Focus ENTIRELY on the User Action. Do NOT introduce any new characters or major events yet."
         };
 
         string upcomingEventContext = progressRequest.TurnsRemaining <= 2
-            ? $"\nUpcoming Event to foreshadow: {progressRequest.NextNode}"
+            ? $"\nUpcoming Event to foreshadow: {nextNode}"
             : "";
 
         string prompt = $@"{settings.SystemPrompt}
@@ -182,7 +187,16 @@ Write the next 40-70 words now:";
 
     private async Task<object> CreateProgressResponse(ProgressRequest progressRequest, string storyText)
     {
-        var turnsRemaining = progressRequest.TurnsRemaining - 1; // TODO: we in fact should calculate this from the next node object
+        var turnsRemaining = progressRequest.TurnsRemaining - 1;
+        var nodeIndex = progressRequest.NodeIndex;
+        bool hasReachedNode = turnsRemaining == 0;
+
+        if (hasReachedNode)
+        {
+            nodeIndex++;
+            var story = await GetStory(progressRequest.StoryId);
+            turnsRemaining = story.Nodes[nodeIndex].Turns;
+        }
 
         string summaryExtension = await LLMService.Generate($"Write a very brief condensed summary of the following:\n{storyText}. ONLY include the summary text. 5-10 words. ONLY THE FACTS. Keep it as short and accurate as possible. If nothing highly significant happened answer NOTHING_MUCH_HAPPENED.");
         summaryExtension = summaryExtension.Contains("NOTHING_MUCH_HAPPENED") ? "" : summaryExtension;
@@ -191,6 +205,7 @@ Write the next 40-70 words now:";
         {
             storyText,
             summarySoFar,
+            nodeIndex,
             turnsRemaining,
         };
         return response;

@@ -11,6 +11,8 @@ export const Edit = () => {
     let navigate = useNavigate();
     const [name, setName] = useState<string>(data.story.name);
     const [structure, setStructure] = useState<string>(data.story.structure);
+    const [startingSummary, setStartingSummary] = useState<string>(data.story.startingSummary);
+    const [introduction, setIntroduction] = useState<string>(data.story.introduction);
     const [nodes, setNodes] = useState<StoryNodeData[]>(data.story.nodes);
 
     const submitStory = async (e: React.SubmitEvent) => {
@@ -19,7 +21,9 @@ export const Edit = () => {
         const story = new Story(
             name,
             structure,
-            nodes.map(n => new StoryNode(n.content, n.turns))
+            startingSummary,
+            introduction,
+            nodes.map(n => new StoryNode(n.content, n.turns)),
         );
 
         await updateStory(data.story.id, story);
@@ -56,6 +60,16 @@ export const Edit = () => {
                    Structure:
                    <input value={structure} onChange={e => setStructure(e.target.value)} />
                </label>
+               
+                <label>
+                    Introduction:
+                    <input value={introduction} onChange={e => setIntroduction(e.target.value)} />
+                </label>
+
+                <label>
+                    Starting Summary:
+                    <input value={startingSummary} onChange={e => setStartingSummary(e.target.value)} />
+                </label>
 
                 <h3>Nodes</h3>
 

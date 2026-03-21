@@ -5,6 +5,8 @@ export type StoryData = {
     id: number,
     name: string,
     structure: string,
+    startingSummary: string,
+    introduction: string,
     nodes: StoryNodeData[]
 }
 

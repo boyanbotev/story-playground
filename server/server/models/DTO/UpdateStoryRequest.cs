@@ -12,5 +12,10 @@ public class UpdateStoryRequest
     public string Structure { get; set; }
 
     [Required]
+    public string StartingSummary { get; set; }
+    [Required]
+    public string Introduction { get; set; }
+
+    [Required]
     public StoryNode[] Nodes { get; set; }
 }
