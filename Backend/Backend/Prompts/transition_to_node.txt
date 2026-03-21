@@ -1,0 +1,1 @@
+CRITICAL INSTRUCTION: Transition the scene to set up this upcoming event: {{NextNode}}. DO NOT let the event actually happen yet. Just put the pieces in place based on the User Action.

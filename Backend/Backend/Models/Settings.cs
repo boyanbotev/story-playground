@@ -4,4 +4,6 @@ public class Settings
 {
     public string SystemPrompt { get; set; }
     public string StyleGuide { get; set; }
+    public string ForeshadowText { get; set; }
+    public string SummaryUnnecessaryPhrase { get; set; }
 }

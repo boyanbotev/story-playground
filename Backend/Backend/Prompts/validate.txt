@@ -1,0 +1,12 @@
+Story Structure: {{StoryStructure}}
+Story So Far: {{StorySoFar}}
+Judge if the following user action is physically possible for the character.
+Accept ANY speech by the main character even if it is implausible or ridiculous.
+Only reject actions if they are not physically plausible (ie. introducing a gun, or a character that doesn't exist yet).
+CRITICAL: reject the user action if it introduces characters or objects.
+User Action: {{UserAction}}
+
+Answer without reasoning exactly in this format:
+YES
+or
+NO

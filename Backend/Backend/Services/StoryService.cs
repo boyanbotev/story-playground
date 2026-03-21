@@ -29,12 +29,14 @@ public class StoryService : IStoryService
 {
     public StoryContext db { get; }
     public ILLMService LLMService { get; }
+    private IPromptService promptService;
     private Settings settings;
-    public StoryService(StoryContext storyContext, ILLMService lLMService, Settings settings)
+    public StoryService(StoryContext storyContext, ILLMService lLMService, IPromptService promptService, Settings settings)
     {
         db = storyContext;
         LLMService = lLMService;
         this.settings = settings;
+        this.promptService = promptService;
     }
 
     public async Task<Story[]> GetStories()
@@ -143,50 +145,54 @@ public class StoryService : IStoryService
 
     public async Task<bool> ValidateUserAction(string userAction, string storyStructure, string storySoFar)
     {
-        string prompt = $@"
-        Story Structure: {storyStructure}
-        Story So Far: {storySoFar}
-        Judge if the following user action is physically possible for the character.
-        Accept ANY speech by the main character even if it is implausible or ridiculous.
-        Only reject actions if they are not physically plausible (ie. introducing a gun, or a character that doesn't exist yet).
-        CRITICAL: reject the user action if it introduces characters or objects.
-        User Action: {userAction}
+        var template = promptService.Load("validate");
+        var prompt = promptService.Fill(template, new Dictionary<string, string>
+        {
+            { "StoryStructure", storyStructure },
+            { "StorySoFar", storySoFar },
+            { "UserAction", userAction },
+        });
 
-        Answer without reasoning exactly in this format:
-        YES
-        or
-        NO
-        ";
         string isTrue = await LLMService.Generate(prompt);
         return isTrue.ToLower().Contains("yes");
     }
 
     private string CreateProgressPrompt(ProgressRequest progressRequest, string nextNode)
     {
+        var actionPrompt = promptService.Load("follow_user_action");
+        var transitionTemplate = promptService.Load("transition_to_node");
+        var experienceTemplate = promptService.Load("experience_node");
+        var transitionPrompt = promptService.Fill(transitionTemplate, new Dictionary<string, string>
+        {
+            { "NextNode", nextNode },
+        });
+        var experiencePrompt = promptService.Fill(experienceTemplate, new Dictionary<string, string>
+        {
+            { "NextNode", nextNode },
+        });
+
         string steeringInstruction = progressRequest.TurnsRemaining switch
         {
-            0 => $"CRITICAL INSTRUCTION: The user MUST now experience this exact event: '{nextNode}'. Make it happen in this response.",
-
-            <= 2 => $"CRITICAL INSTRUCTION: Transition the scene to set up this upcoming event: '{nextNode}'. DO NOT let the event actually happen yet. Just put the pieces in place based on the User Action.",
-
-            _ => $"CRITICAL INSTRUCTION: Focus ENTIRELY on the User Action. Do NOT introduce any new characters or major events yet."
+            0 => experiencePrompt,
+            <= 2 => transitionPrompt,
+            _ => actionPrompt
         };
 
         string upcomingEventContext = progressRequest.TurnsRemaining <= 2
-            ? $"\nUpcoming Event to foreshadow: {nextNode}"
+            ? $"\n{settings.ForeshadowText}{nextNode}"
             : "";
 
-        string prompt = $@"{settings.SystemPrompt}
-Story Style Guide: {settings.StyleGuide}
+        var template = promptService.Load("progress");
+        var prompt = promptService.Fill(template, new Dictionary<string, string>
+        {
+            { "SystemPrompt", settings.SystemPrompt },
+            { "StyleGuide", settings.StyleGuide },
+            { "SummarySoFar", progressRequest.SummarySoFar },
+            { "UpcomingEventContext", upcomingEventContext },
+            { "UserAction", progressRequest.UserAction },
+            { "SteeringInstruction", steeringInstruction },
+        });
 
-Summary of story so far: {progressRequest.SummarySoFar}
-{upcomingEventContext}
-
-=== CURRENT TURN ===
-User Action: {progressRequest.UserAction}
-{steeringInstruction}
-
-Write the next 40-70 words now:";
         return prompt;
     }
 
@@ -203,8 +209,15 @@ Write the next 40-70 words now:";
             turnsRemaining = story.Nodes[nodeIndex].Turns;
         }
 
-        string summaryExtension = await LLMService.Generate($"Write a very brief condensed summary of the following:\n{storyText}. ONLY include the summary text. 5-10 words. ONLY THE FACTS. Keep it as short and accurate as possible. If nothing highly significant happened answer NOTHING_MUCH_HAPPENED.");
-        summaryExtension = summaryExtension.Contains("NOTHING_MUCH_HAPPENED") ? "" : summaryExtension;
+        var template = promptService.Load("summary");
+        var prompt = promptService.Fill(template, new Dictionary<string, string>
+        {
+            { "StoryText", storyText },
+            { "SummaryUnnecessaryPhrase", settings.SummaryUnnecessaryPhrase },
+        });
+
+        string summaryExtension = await LLMService.Generate(prompt);
+        summaryExtension = summaryExtension.Contains(settings.SummaryUnnecessaryPhrase) ? "" : summaryExtension;
         string summarySoFar = progressRequest.SummarySoFar + " " + summaryExtension;
         var response = new
         {

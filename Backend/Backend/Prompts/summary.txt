@@ -1,0 +1,2 @@
+Write a very brief condensed summary of the following:
+{{StoryText}}. ONLY include the summary text. 5-10 words. ONLY THE FACTS. Keep it as short and accurate as possible. If nothing highly significant happened answer {{SummaryUnnecessaryPhrase}}.

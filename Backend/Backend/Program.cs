@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<IPromptService, PromptService>();
 builder.Services.AddScoped<ILLMService, OllamaService>();
 builder.Services.AddScoped<IStoryService, StoryService>();
 builder.Services.Configure<JsonOptions>(options =>
