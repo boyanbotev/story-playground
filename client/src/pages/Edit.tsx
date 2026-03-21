@@ -1,7 +1,7 @@
 import { useNavigate, useLoaderData } from "react-router"
 import { Story } from "../dto/Story";
 import { StoryNode } from "../dto/StoryNode";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { updateStory } from "../requests/updateStory";
 import type { StoryNodeData } from "../pages/Stories"
 

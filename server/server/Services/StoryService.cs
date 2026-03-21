@@ -123,7 +123,12 @@ public class StoryService : IStoryService
         bool isValid = await ValidateUserAction(progressRequest.UserAction, story.Structure, progressRequest.SummarySoFar);
         if (!isValid)
         {
-            return "Invalid User Action";
+            var error = "Invalid User Action";
+            var errorResponse = new
+            {
+                error,
+            };
+            return errorResponse;
         }
 
         var nextNode = story.Nodes[progressRequest.NodeIndex].Content;

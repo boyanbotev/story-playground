@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLoaderData } from 'react-router';
 import { requestProgress } from '../requests/requestProgress';
+import { LoadingAnimation } from '../components/LoadingAnimation';
 
 export const Game = () => {
     const { story } = useLoaderData();
@@ -9,11 +10,22 @@ export const Game = () => {
     const [ nodeIndex, setNodeIndex ] = useState<number>(0);
     const [ action, setAction ] = useState<string>("");
     const [ storyText, setStoryText ] = useState<string>(story.introduction);
+    const [ isLoading, setIsLoading ] = useState<boolean>(false);
+    const [ error, setError ] = useState<string>("");
 
     const submitAction = async (e: React.SubmitEvent) => {
         e.preventDefault();
+        setIsLoading(true);
 
         const response = await requestProgress(story.id, nodeIndex, action, runningSummary, turnsRemaing);
+
+        if (response.error) {
+            setIsLoading(false);
+            setAction("");
+            setError(response.error);
+            return;
+        }
+
         console.log("request", action, runningSummary, turnsRemaing, story.nodes[nodeIndex].content, story.structure);
         console.log("response", response);
         
@@ -22,14 +34,19 @@ export const Game = () => {
         setStoryText(response.storyText);
         setAction("");
         setNodeIndex(response.nodeIndex);
+        setIsLoading(false);
+        setError("");
         // TODO:
-        // loading graphic while waiting for response
+        // duration of node, not only transition between them
     }
 
-    return (
+    return isLoading ? (
+        <LoadingAnimation />
+    ) : (
         <div>
             <h1>{story.name}</h1>
             <p>{storyText}</p>
+            <p className={"error"}>{error}</p>
             <form className="form" onSubmit={submitAction}>
                 <label>
                     Write your action here:
