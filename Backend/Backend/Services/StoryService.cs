@@ -1,10 +1,10 @@
 
-using server.models.db;
-using server.models.DTO;
+using Backend.Models.Db;
+using Backend.Models.DTO;
 using Microsoft.EntityFrameworkCore;
-using server.models;
+using Backend.Models;
 
-namespace server.Services;
+namespace Backend.Services;
 
 public enum AddResult
 {

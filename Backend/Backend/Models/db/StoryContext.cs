@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace server.models.db;
+namespace Backend.Models.Db;
 
 public class StoryContext : DbContext
 {

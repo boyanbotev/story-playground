@@ -1,6 +1,6 @@
-using server.models.DTO;
-using server.Services;
-using server.models.db;
+using Backend.Models.DTO;
+using Backend.Services;
+using Backend.Models.Db;
 
 public interface IStoryService
 {

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace server.models.db;
+namespace Backend.Models.Db;
 
 public class StoryNode
 {

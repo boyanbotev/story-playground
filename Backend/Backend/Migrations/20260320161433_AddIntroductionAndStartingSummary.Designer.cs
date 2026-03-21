@@ -3,11 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using server.models.db;
+using Backend.Models.Db;
 
 #nullable disable
 
-namespace server.Migrations
+namespace Backend.Migrations
 {
     [DbContext(typeof(StoryContext))]
     [Migration("20260320161433_AddIntroductionAndStartingSummary")]

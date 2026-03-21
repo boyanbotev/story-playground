@@ -3,15 +3,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using server.models.db;
+using Backend.Models.Db;
 
 #nullable disable
 
-namespace server.Migrations
+namespace Backend.Migrations
 {
     [DbContext(typeof(StoryContext))]
-    [Migration("20260314200334_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260316122145_AdjustStory")]
+    partial class AdjustStory
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,14 @@ namespace server.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Structure")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 

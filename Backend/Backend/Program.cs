@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore;
-using server.Services;
-using server.models;
+using Backend.Services;
+using Backend.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +22,7 @@ var folder = Environment.SpecialFolder.LocalApplicationData;
 var path = Environment.GetFolderPath(folder);
 var dbPath = Path.Join(path, "stories.db");
 
-builder.Services.AddDbContext<server.models.db.StoryContext>(options =>
+builder.Services.AddDbContext<Backend.Models.Db.StoryContext>(options =>
     options.UseSqlite($"Data Source={dbPath}"));
 
 var app = builder.Build();

@@ -1,5 +1,5 @@
 
-namespace server.models;
+namespace Backend.Models;
 public class Settings
 {
     public string SystemPrompt { get; set; }

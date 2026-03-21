@@ -1,21 +1,16 @@
 using System.ComponentModel.DataAnnotations;
-using server.models.db;
 
-namespace server.models.DTO;
+namespace Backend.Models.Db;
 
-public class UpdateStoryRequest
+public class Story
 {
-    [Required]
+    [Key]
+    public int Id { get; set; }
     public string Name { get; set; }
-
-    [Required]
     public string Structure { get; set; }
-
-    [Required]
     public string StartingSummary { get; set; }
-    [Required]
     public string Introduction { get; set; }
+    public List<StoryNode> Nodes { get; set; }
 
-    [Required]
-    public StoryNode[] Nodes { get; set; }
+    public Story() {}
 }

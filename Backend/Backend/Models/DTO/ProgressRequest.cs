@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace server.models.DTO;
+namespace Backend.Models.DTO;
 
 public class ProgressRequest
 {

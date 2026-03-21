@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace server.Migrations
+namespace Backend.Migrations
 {
     /// <inheritdoc />
     public partial class AdjustStory : Migration

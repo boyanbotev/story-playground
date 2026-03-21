@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using server.models;
-using server.models.DTO;
-using server.Services;
+using Backend.Models;
+using Backend.Models.DTO;
+using Backend.Services;
 using System.Net;
 
 public static class StoryEndpoints

@@ -1,7 +1,7 @@
 using System.Text;
 using Newtonsoft.Json;
 
-namespace server.Services;
+namespace Backend.Services;
 public class OllamaService : ILLMService
 {
     private readonly HttpClient _client;
