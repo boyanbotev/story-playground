@@ -82,3 +82,8 @@ nav {
     transform: rotate(360deg);
   }
 }
+
+textarea {
+  width: 100%;
+  height: 100px;
+}

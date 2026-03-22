@@ -1,4 +1,4 @@
-export const requestProgress = async (storyId: number, nodeIndex: number, userAction: string, summarySoFar: string, turnsRemaining: number) => {
+export const requestProgress = async (storyId: number, nodeIndex: number, userAction: string, summarySoFar: string, transitionTurnsRemaining: number, contentTurnsRemaining: number) => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
     const response = await fetch(`${baseUrl}\progress`, {
         method: 'POST',
@@ -10,7 +10,8 @@ export const requestProgress = async (storyId: number, nodeIndex: number, userAc
             nodeIndex,
             userAction,
             summarySoFar,
-            turnsRemaining,
+            transitionTurnsRemaining,
+            contentTurnsRemaining,
         }),
     });
     return await response.json();

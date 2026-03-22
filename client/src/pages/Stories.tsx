@@ -13,7 +13,8 @@ export type StoryData = {
 export type StoryNodeData = {
     id: number,
     content: string,
-    turns: number
+    transitionTurns: number,
+    contentTurns: number,
 }
 
 export const Stories = () => {

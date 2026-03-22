@@ -6,7 +6,8 @@ import { LoadingAnimation } from '../components/LoadingAnimation';
 export const Game = () => {
     const { story } = useLoaderData();
     const [ runningSummary, setRunningSummary ] = useState<string>(story.startingSummary);
-    const [ turnsRemaing, setTurnsRemaining ] = useState<number>(story.nodes[0].turns);
+    const [ transitionTurnsRemaining, setTransitionTurnsRemaining ] = useState<number>(story.nodes[0].transitionTurns);
+    const [ contentTurnsRemaining, setContentTurnsRemaining ] = useState<number>(story.nodes[0].contentTurns);
     const [ nodeIndex, setNodeIndex ] = useState<number>(0);
     const [ action, setAction ] = useState<string>("");
     const [ storyText, setStoryText ] = useState<string>(story.introduction);
@@ -17,7 +18,7 @@ export const Game = () => {
         e.preventDefault();
         setIsLoading(true);
 
-        const response = await requestProgress(story.id, nodeIndex, action, runningSummary, turnsRemaing);
+        const response = await requestProgress(story.id, nodeIndex, action, runningSummary, transitionTurnsRemaining, contentTurnsRemaining);
 
         if (response.error) {
             setIsLoading(false);
@@ -26,18 +27,17 @@ export const Game = () => {
             return;
         }
 
-        console.log("request", action, runningSummary, turnsRemaing, story.nodes[nodeIndex].content, story.structure);
+        console.log("request", action, runningSummary, transitionTurnsRemaining, story.nodes[nodeIndex].content, story.structure);
         console.log("response", response);
         
         setRunningSummary(response.summarySoFar);
-        setTurnsRemaining(response.turnsRemaining);
+        setTransitionTurnsRemaining(response.transitionTurnsRemaining);
+        setContentTurnsRemaining(response.contentTurnsRemaining);
         setStoryText(response.storyText);
         setAction("");
         setNodeIndex(response.nodeIndex);
         setIsLoading(false);
         setError("");
-        // TODO:
-        // duration of node, not only transition between them
     }
 
     return isLoading ? (

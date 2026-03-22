@@ -23,7 +23,7 @@ export const Edit = () => {
             structure,
             startingSummary,
             introduction,
-            nodes.map(n => new StoryNode(n.content, n.turns)),
+            nodes.map(n => new StoryNode(n.content, n.transitionTurns, n.contentTurns)),
         );
 
         await updateStory(data.story.id, story);
@@ -31,18 +31,18 @@ export const Edit = () => {
     };
 
     const addNode = () => {
-        setNodes([...nodes, { id: nodes.length, content: "", turns: 0 }]);
+        setNodes([...nodes, { id: nodes.length, content: "", transitionTurns: 0, contentTurns: 0 }]);
     };
 
     const removeNode = (index: number) => {
         setNodes(nodes.filter((_, i) => i !== index));
     };
 
-    const updateNode = (index: number, field: "content" | "turns", value: string) => {
+    const updateNode = (index: number, field: "content" | "transitionTurns" | "contentTurns", value: string) => {
         const updated = [...nodes];
         updated[index] = {
             ...updated[index],
-            [field]: field === "turns" ? Number(value) : value
+            [field]: field === "content" ? value : Number(value)
         };
         setNodes(updated);
     };
@@ -53,22 +53,22 @@ export const Edit = () => {
                 <form className="form" onSubmit={submitStory}>
                 <label>
                     Story Name:
-                    <input value={name} onChange={e => setName(e.target.value)} />
+                    <textarea value={name} onChange={e => setName(e.target.value)} />
                 </label>
                 
                 <label>
                    Structure:
-                   <input value={structure} onChange={e => setStructure(e.target.value)} />
+                   <textarea value={structure} onChange={e => setStructure(e.target.value)} />
                </label>
                
                 <label>
                     Introduction:
-                    <input value={introduction} onChange={e => setIntroduction(e.target.value)} />
+                    <textarea value={introduction} onChange={e => setIntroduction(e.target.value)} />
                 </label>
 
                 <label>
                     Starting Summary:
-                    <input value={startingSummary} onChange={e => setStartingSummary(e.target.value)} />
+                    <textarea value={startingSummary} onChange={e => setStartingSummary(e.target.value)} />
                 </label>
 
                 <h3>Nodes</h3>
@@ -84,12 +84,21 @@ export const Edit = () => {
                             />
                         </label>
                         <label>
-                            Turns:
+                            Transition Turns:
                             <input
                                 type="number"
-                                placeholder="Turns"
-                                value={node.turns}
-                                onChange={e => updateNode(i, "turns", e.target.value)}
+                                placeholder="TransitionTurns"
+                                value={node.transitionTurns}
+                                onChange={e => updateNode(i, "transitionTurns", e.target.value)}
+                            />
+                        </label>
+                        <label>
+                            Content Turns:
+                            <input
+                                type="number"
+                                placeholder="ContentTurns"
+                                value={node.contentTurns}
+                                onChange={e => updateNode(i, "contentTurns", e.target.value)}
                             />
                         </label>
 

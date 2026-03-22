@@ -11,7 +11,10 @@ public class ProgressRequest
     public int NodeIndex { get; set; }
 
     [Required]
-    public int TurnsRemaining { get; set; } // backend should also track this?
+    public int TransitionTurnsRemaining { get; set; }
+    
+    [Required]
+    public int ContentTurnsRemaining { get; set; }
 
     [Required]
     public string SummarySoFar { get; set; }

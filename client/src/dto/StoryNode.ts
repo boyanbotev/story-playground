@@ -1,9 +1,11 @@
 export class StoryNode {
     content: string;
-    turns: number;
+    transitionTurns: number;
+    contentTurns: number;
 
-    constructor(content: string, turns: number) {
+    constructor(content: string, transitionTurns: number, contentTurns: number) {
         this.content = content;
-        this.turns = turns;
+        this.transitionTurns = transitionTurns;
+        this.contentTurns = contentTurns;
     }
 }

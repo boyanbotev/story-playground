@@ -4,7 +4,8 @@ export const NodeCard = ({ node }: { node: StoryNodeData }) => {
     return (
         <div className="node">
             <p>Content: {node.content}</p>
-            <p>Turns: {node.turns}</p>
+            <p>Transition Turns: {node.transitionTurns}</p>
+            <p>Content Turns: {node.contentTurns}</p>
         </div>
     )
 }
