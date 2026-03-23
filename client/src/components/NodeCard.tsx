@@ -1,6 +1,6 @@
-import type { StoryNodeData } from "../pages/Stories"
+import type { StoryNode } from "../dto/StoryNode";
 
-export const NodeCard = ({ node }: { node: StoryNodeData }) => {
+export const NodeCard = ({ node }: { node: StoryNode }) => {
     return (
         <div className="node">
             <p>Content: {node.content}</p>

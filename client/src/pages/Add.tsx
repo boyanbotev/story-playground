@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Story } from "../dto/Story";
+import type { Story } from "../dto/Story";
 import { postAddStory } from "../requests/postAddStory";
-import { StoryNode } from "../dto/StoryNode";
 
 export const Add = () => {
     const [name, setName] = useState("");
@@ -13,13 +12,13 @@ export const Add = () => {
     const submitStory = async (e: React.SubmitEvent) => {
         e.preventDefault();
 
-        const story = new Story(
+        const story: Story = {
             name,
             structure,
             startingSummary,
             introduction,
-            nodes.map(n => new StoryNode(n.content, n.transitionTurns, n.contentTurns)),
-        );
+            nodes: nodes.map(n => { return { content: n.content, transitionTurns: n.transitionTurns, contentTurns: n.contentTurns } })
+        };
 
         await postAddStory(story);
 

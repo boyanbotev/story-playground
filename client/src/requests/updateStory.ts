@@ -1,4 +1,4 @@
-import { Story } from "../dto/Story";
+import type { Story } from "../dto/Story";
 
 export const updateStory = async (storyId: number, story: Story) => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL;

@@ -1,9 +1,9 @@
 import { NavLink, useRevalidator } from "react-router"
-import type { StoryData } from "../pages/Stories"
+import type { Story } from "../dto/Story";
 import { NodeCard } from "./NodeCard"
 import { deleteStory } from "../requests/deleteStory"
 
-export const StoryCard = ({ story }: { story: StoryData }) => {
+export const StoryCard = ({ story }: { story: Story }) => {
 
     const { revalidate } = useRevalidator();
 
@@ -21,7 +21,7 @@ export const StoryCard = ({ story }: { story: StoryData }) => {
             <div className="nodes">{story.nodes.map(n => <NodeCard key={n.id} node={n} />)}</div>
             <NavLink to={`/stories/${story.id}`}>Edit</NavLink>
             <NavLink to={`/stories/${story.id}/play`}>Play</NavLink>
-            <button type="button" onClick={() => onClickDelete(story.id)}>Delete</button>
+            <button type="button" onClick={() => onClickDelete(story.id!)}>Delete</button>
         </div>
     )
 }

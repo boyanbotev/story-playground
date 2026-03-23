@@ -1,10 +1,8 @@
 import { useNavigate, useLoaderData } from "react-router"
-import { Story } from "../dto/Story";
-import { StoryNode } from "../dto/StoryNode";
+import type { Story } from "../dto/Story";
+import type { StoryNode } from "../dto/StoryNode";
 import { useState } from "react";
 import { updateStory } from "../requests/updateStory";
-import type { StoryNodeData } from "../pages/Stories"
-
 
 export const Edit = () => {
     let data = useLoaderData();
@@ -13,18 +11,19 @@ export const Edit = () => {
     const [structure, setStructure] = useState<string>(data.story.structure);
     const [startingSummary, setStartingSummary] = useState<string>(data.story.startingSummary);
     const [introduction, setIntroduction] = useState<string>(data.story.introduction);
-    const [nodes, setNodes] = useState<StoryNodeData[]>(data.story.nodes);
+    const [nodes, setNodes] = useState<StoryNode[]>(data.story.nodes);
 
     const submitStory = async (e: React.SubmitEvent) => {
         e.preventDefault();
 
-        const story = new Story(
+        const story: Story = {
+            id: data.story.id,
             name,
             structure,
             startingSummary,
             introduction,
-            nodes.map(n => new StoryNode(n.content, n.transitionTurns, n.contentTurns)),
-        );
+            nodes: nodes.map(n => { return { id: n.id, content: n.content, transitionTurns: n.transitionTurns, contentTurns: n.contentTurns } })
+        };
 
         await updateStory(data.story.id, story);
         navigate("/stories");
@@ -73,7 +72,7 @@ export const Edit = () => {
 
                 <h3>Nodes</h3>
 
-                {nodes.map((node: StoryNodeData, i: number) => (
+                {nodes.map((node: StoryNode, i: number) => (
                     <div key={i}>
                         <label>
                             Content:
