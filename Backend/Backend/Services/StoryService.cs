@@ -225,20 +225,14 @@ public class StoryService : IStoryService
         var transitionTurnsRemaining = progressRequest.TransitionTurnsRemaining;
         var contentTurnsRemaining = progressRequest.ContentTurnsRemaining;
 
-        if (transitionTurnsRemaining > 0)
+        if (transitionTurnsRemaining > 0) transitionTurnsRemaining--;
+        else contentTurnsRemaining--;
+        
+        if (transitionTurnsRemaining < 1 && contentTurnsRemaining < 1)
         {
-            transitionTurnsRemaining--;
-        }
-        else
-        {
-            contentTurnsRemaining--;
-
-            if (contentTurnsRemaining == 0)
-            {
-                nodeIndex++;
-                contentTurnsRemaining = story.Nodes[nodeIndex].ContentTurns;
-                transitionTurnsRemaining = story.Nodes[nodeIndex].TransitionTurns;
-            }
+            nodeIndex++;
+            contentTurnsRemaining = story.Nodes[nodeIndex].ContentTurns;
+            transitionTurnsRemaining = story.Nodes[nodeIndex].TransitionTurns;
         }
 
         return new StoryStats(nodeIndex, transitionTurnsRemaining, contentTurnsRemaining);

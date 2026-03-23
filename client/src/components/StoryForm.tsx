@@ -75,6 +75,7 @@ export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
                     <li>The content turns is how many turns the game stays on the content of the node.</li>
                     <li>Try to keep the transition turns and content turns as low as possible. (eg. 1 or 2)</li>
                     <li>Avoid introducing objects without being clear about what they are. Eg. prefer "Bashar finds a very valuable pearl" to "Bashar finds a very valuable object"</li>
+                    <li> Use named characters or very specific descriptions (the one-eyed man) to avoid confusing the LLM</li>
                 </ul>
             </div>
             <div className="nodes">
