@@ -1,2 +1,2 @@
 Write a very brief condensed summary of the following:
-{{StoryText}}. ONLY include the summary text. 5-10 words. ONLY THE FACTS. Keep it as short and accurate as possible. If nothing highly significant happened answer {{SummaryUnnecessaryPhrase}}.
+{{StoryText}}. ONLY include the summary text. 5-10 words. ONLY THE FACTS. If nothing highly significant happened answer {{SummaryUnnecessaryPhrase}}. CRITICAL: focus on the nuts and bolts of what happened, what exactly the character did or where they went.

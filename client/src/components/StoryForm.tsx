@@ -68,7 +68,15 @@ export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
             <textarea value={startingSummary} onChange={e => setStartingSummary(e.target.value)} />
 
             <h3>Nodes</h3>
-
+            <div className={"tips"}>
+                <i>Node Writing Tips</i>
+                <ul>
+                    <li>The transition turns are the number of turns it takes for the character to transition to/ foreshadow the content of the node.</li>
+                    <li>The content turns is how many turns the game stays on the content of the node.</li>
+                    <li>Try to keep the transition turns and content turns as low as possible. (eg. 1 or 2)</li>
+                    <li>Avoid introducing objects without being clear about what they are. Eg. prefer "Bashar finds a very valuable pearl" to "Bashar finds a very valuable object"</li>
+                </ul>
+            </div>
             <div className="nodes">
                 {nodes.map((node, i) => (
                     <div className="node" key={i}>

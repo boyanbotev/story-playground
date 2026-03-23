@@ -87,3 +87,21 @@ textarea {
   width: 100%;
   height: 100px;
 }
+
+.tips {
+  color: #a7baff;
+  text-align: start;
+  margin-bottom: 2rem;
+}
+
+.tips i {
+  margin-top: 0;
+  text-align: center;
+}
+
+.button-panel {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+}

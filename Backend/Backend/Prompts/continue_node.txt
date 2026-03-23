@@ -1,1 +1,1 @@
-CRITICAL INSTRUCTION: The user MUST now experience the continuation of this event: {{NextNode}}, incorporating the User Action.
+CRITICAL INSTRUCTION: The user MUST now experience the CONTINUATION/AFTERMATH of this event: {{NextNode}}, incorporating the User Action.

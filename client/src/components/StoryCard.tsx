@@ -19,9 +19,12 @@ export const StoryCard = ({ story }: { story: Story }) => {
             <p>Starting Summary: {story.startingSummary}</p>
             <p>Introduction: {story.introduction}</p>
             <div className="nodes">{story.nodes.map(n => <NodeCard key={n.id} node={n} />)}</div>
-            <NavLink to={`/stories/${story.id}`}>Edit</NavLink>
-            <NavLink to={`/stories/${story.id}/play`}>Play</NavLink>
-            <button type="button" onClick={() => onClickDelete(story.id!)}>Delete</button>
+            <div className="button-panel">
+                <NavLink to={`/stories/${story.id}`}>Edit</NavLink>
+                <NavLink to={`/stories/${story.id}/play`}>Play</NavLink>
+                <button type="button" onClick={() => onClickDelete(story.id!)}>Delete</button>
+            </div>
+
         </div>
     )
 }
