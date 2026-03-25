@@ -37,7 +37,7 @@ public class StoryService : IStoryService
 
     public async Task<Story[]> GetStories()
     {
-        return await db.Stories.Include(s => s.Nodes).AsNoTracking().ToArrayAsync();
+        return await db.Stories.Include(s => s.Nodes.OrderBy(n => n.Order)).AsNoTracking().ToArrayAsync();
     }
 
     public async Task<AddResult> AddStory(AddStoryRequest addRequest)
@@ -49,6 +49,7 @@ public class StoryService : IStoryService
         story.Introduction = addRequest.Introduction;
 
         story.Nodes = new List<Node>();
+        int order = 0;
         foreach (var node in addRequest.Nodes)
         {
             switch (node)
@@ -59,6 +60,7 @@ public class StoryService : IStoryService
                         Content = storyNode.Content,
                         TransitionTurns = storyNode.TransitionTurns,
                         ContentTurns = storyNode.ContentTurns,
+                        Order = order++,
                     });
                     break;
                 case QuestNodeRequest questNode:
@@ -67,11 +69,11 @@ public class StoryService : IStoryService
                         Content = questNode.Content,
                         UserGoal = questNode.UserGoal,
                         Difficulty = questNode.Difficulty,
+                        Order = order++,
                     });
                     break;
             }
         }
-        Console.WriteLine(story.Nodes.Count);
 
         await db.Stories.AddAsync(story);
          try {
@@ -83,12 +85,12 @@ public class StoryService : IStoryService
     }
     public async Task<Story> GetStory(int id)
     {
-        return await db.Stories.Include(s => s.Nodes).AsNoTracking().FirstOrDefaultAsync(s => s.Id == id);
+        return await db.Stories.Include(s => s.Nodes.OrderBy(n => n.Order)).AsNoTracking().FirstOrDefaultAsync(s => s.Id == id);
     }
 
     public async Task<UpdateResult> UpdateStory(int id, UpdateStoryRequest updateStoryRequest)
     {
-        var story = await db.Stories.Include(s => s.Nodes).FirstOrDefaultAsync(s => s.Id == id);
+        var story = await db.Stories.Include(s => s.Nodes.OrderBy(n => n.Order)).FirstOrDefaultAsync(s => s.Id == id);
 
         if (story == null)
         {
@@ -101,6 +103,7 @@ public class StoryService : IStoryService
         story.Introduction = updateStoryRequest.Introduction;
 
         story.Nodes.Clear();
+        int order = 0;
         foreach (var node in updateStoryRequest.Nodes)
         {
             switch (node)
@@ -111,6 +114,7 @@ public class StoryService : IStoryService
                         Content = storyNode.Content,
                         TransitionTurns = storyNode.TransitionTurns,
                         ContentTurns = storyNode.ContentTurns,
+                        Order = order++,
                     });
                     break;
                 case QuestNodeRequest questNode:
@@ -119,10 +123,14 @@ public class StoryService : IStoryService
                         Content = questNode.Content,
                         UserGoal = questNode.UserGoal,
                         Difficulty = questNode.Difficulty,
+                        Order = order++,
                     });
                     break;
             }
-        }
+        } 
+        // TODO: rearranging node order
+        // confirmation before deleting story
+        // update game to send progress responses for questnodes correctly
 
         await db.SaveChangesAsync();
         return UpdateResult.Success;

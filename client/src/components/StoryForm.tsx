@@ -48,7 +48,6 @@ export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
                 throw new Error("Unknown node type");
             })
         };
-
         await onSubmit(story);
     };
 

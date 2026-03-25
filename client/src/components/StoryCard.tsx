@@ -15,10 +15,10 @@ export const StoryCard = ({ story }: { story: Story }) => {
     return (
         <div>
             <h2>{story.name}</h2>
-            <p>Story synopisis: {story.structure}</p>
-            <p>Starting Summary: {story.startingSummary}</p>
-            <p>Introduction: {story.introduction}</p>
-            <div className="nodes">{story.nodes.map(n => <NodeCard key={n.id} node={n} />)}</div>
+            <p>Synopsis: {story.structure}</p>
+            {/* <p>Starting Summary: {story.startingSummary}</p> */}
+            {/* <p>Introduction: {story.introduction}</p> */}
+            {/* <div className="nodes">{story.nodes.map(n => <NodeCard key={n.id} node={n} />)}</div> */}
             <div className="button-panel">
                 <NavLink to={`/stories/${story.id}`}>Edit</NavLink>
                 <NavLink to={`/stories/${story.id}/play`}>Play</NavLink>
