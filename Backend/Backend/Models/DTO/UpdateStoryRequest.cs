@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Backend.Models.Db;
 
 namespace Backend.Models.DTO;
 
@@ -17,5 +16,7 @@ public class UpdateStoryRequest
     public string Introduction { get; set; }
 
     [Required]
-    public StoryNode[] Nodes { get; set; }
+    public List<NodeRequest> Nodes { get; set; }
+
+    public UpdateStoryRequest() {}
 }

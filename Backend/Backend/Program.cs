@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using Backend.Services;
 using Backend.Models;
+using System.Text.Json.Serialization.Metadata;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,9 +11,14 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<IPromptService, PromptService>();
 builder.Services.AddScoped<ILLMService, OllamaService>();
 builder.Services.AddScoped<IStoryService, StoryService>();
+builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.Configure<JsonOptions>(options =>
 {
     options.SerializerOptions.PropertyNameCaseInsensitive = true;
+        options.SerializerOptions.TypeInfoResolverChain.Insert(
+        0,
+        new DefaultJsonTypeInfoResolver()
+    );
 });
 
 var settings = new Settings();

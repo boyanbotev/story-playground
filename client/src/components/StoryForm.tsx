@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Story } from "../dto/Story";
+import type { StoryNode } from "../dto/StoryNode";
 
 type StoryFormProps = {
     initialStory: Partial<Story>;
@@ -11,8 +12,9 @@ export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
     const [structure, setStructure] = useState(initialStory.structure ?? "");
     const [startingSummary, setStartingSummary] = useState(initialStory.startingSummary ?? "");
     const [introduction, setIntroduction] = useState(initialStory.introduction ?? "");
-    const [nodes, setNodes] = useState(
-        initialStory.nodes ?? [{ content: "", transitionTurns: 0, contentTurns: 0 }]
+    const [nodes, setNodes] = useState<StoryNode[]>(
+        initialStory.nodes?.map(n => ({ ...n, type: n.type ?? (n.difficulty ? "quest" : "story") })) 
+            ?? [{ type: "story", content: "", transitionTurns: 0, contentTurns: 0 }]
     );
 
     const submit = async (e: React.FormEvent) => {
@@ -24,19 +26,34 @@ export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
             structure,
             startingSummary,
             introduction,
-            nodes: nodes.map(n => ({
-                id: n.id,
-                content: n.content,
-                transitionTurns: n.transitionTurns,
-                contentTurns: n.contentTurns
-            }))
+            nodes: nodes.map(n => {
+                if (n.type === "story") {
+                    return {
+                        type: "story",
+                        content: n.content,
+                        transitionTurns: n.transitionTurns,
+                        contentTurns: n.contentTurns
+                    };
+                }
+
+                if (n.type === "quest") {
+                    return {
+                        type: "quest",
+                        content: n.content,
+                        userGoal: n.userGoal,
+                        difficulty: n.difficulty
+                    };
+                }
+
+                throw new Error("Unknown node type");
+            })
         };
 
         await onSubmit(story);
     };
 
     const addNode = () => {
-        setNodes([...nodes, { content: "", transitionTurns: 0, contentTurns: 0 }]);
+        setNodes([...nodes, { type: "story", content: "", transitionTurns: 0, contentTurns: 0 }]);
     };
 
     const removeNode = (index: number) => {
@@ -45,14 +62,22 @@ export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
 
     const updateNode = (
         index: number,
-        field: "content" | "transitionTurns" | "contentTurns",
+        field: keyof StoryNode,
         value: string
     ) => {
         const updated = [...nodes];
+
         updated[index] = {
             ...updated[index],
-            [field]: field === "content" ? value : Number(value)
+            [field]:
+                field === "content" ||
+                field === "type" ||
+                field === "userGoal" ||
+                field === "difficulty"
+                    ? value
+                    : Number(value)
         };
+
         setNodes(updated);
     };
 
@@ -81,29 +106,59 @@ export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
             <div className="nodes">
                 {nodes.map((node, i) => (
                     <div className="node" key={i}>
+                        <select
+                            value={node.type}
+                            onChange={e => updateNode(i, "type", e.target.value)}
+                        >
+                            <option value="story">Story Node</option>
+                            <option value="quest">Quest Node</option>
+                        </select>
                         <textarea
                             value={node.content}
                             placeholder="Content"
                             onChange={e => updateNode(i, "content", e.target.value)}
                         />
-                        <label>
-                            Transition Turns:
-                            <input
-                                type="number"
-                                placeholder="Transition Turns"
-                                value={node.transitionTurns}
-                                onChange={e => updateNode(i, "transitionTurns", e.target.value)}
-                            />
-                        </label>
-                        <label>
-                            Content Turns:
-                            <input
-                                type="number"
-                                placeholder="Content Turns"
-                                value={node.contentTurns}
-                                onChange={e => updateNode(i, "contentTurns", e.target.value)}
-                            />
-                        </label>
+                        {node.type === "story" && (
+                            <>
+                                <label>
+                                    Transition Turns:
+                                    <input
+                                        type="number"
+                                        value={node.transitionTurns ?? 0}
+                                        onChange={e => updateNode(i, "transitionTurns", e.target.value)}
+                                    />
+                                </label>
+
+                                <label>
+                                    Content Turns:
+                                    <input
+                                        type="number"
+                                        value={node.contentTurns ?? 0}
+                                        onChange={e => updateNode(i, "contentTurns", e.target.value)}
+                                    />
+                                </label>
+                            </>
+                        )}
+
+                        {node.type === "quest" && (
+                            <>
+                                <label>
+                                    User Goal:
+                                    <input
+                                        value={node.userGoal ?? ""}
+                                        onChange={e => updateNode(i, "userGoal", e.target.value)}
+                                    />
+                                </label>
+
+                                <label>
+                                    Difficulty:
+                                    <input
+                                        value={node.difficulty ?? ""}
+                                        onChange={e => updateNode(i, "difficulty", e.target.value)}
+                                    />
+                                </label>
+                            </>
+                        )}
                         <button type="button" onClick={() => removeNode(i)}>Remove</button>
                     </div>
                 ))}

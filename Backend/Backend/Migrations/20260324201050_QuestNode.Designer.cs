@@ -2,6 +2,7 @@
 using Backend.Models.Db;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(StoryContext))]
-    partial class StoryContextModelSnapshot : ModelSnapshot
+    [Migration("20260324201050_QuestNode")]
+    partial class QuestNode
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.5");
@@ -26,23 +29,14 @@ namespace Backend.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("NodeType")
-                        .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("StoryId")
+                    b.Property<int>("storyId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StoryId");
+                    b.HasIndex("storyId");
 
                     b.ToTable("Nodes");
-
-                    b.HasDiscriminator<string>("NodeType").HasValue("Node");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Backend.Models.Db.Story", b =>
@@ -72,39 +66,11 @@ namespace Backend.Migrations
                     b.ToTable("Stories");
                 });
 
-            modelBuilder.Entity("Backend.Models.Db.QuestNode", b =>
-                {
-                    b.HasBaseType("Backend.Models.Db.Node");
-
-                    b.Property<string>("Difficulty")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UserGoal")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasDiscriminator().HasValue("QuestNode");
-                });
-
-            modelBuilder.Entity("Backend.Models.Db.StoryNode", b =>
-                {
-                    b.HasBaseType("Backend.Models.Db.Node");
-
-                    b.Property<int>("ContentTurns")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("TransitionTurns")
-                        .HasColumnType("INTEGER");
-
-                    b.HasDiscriminator().HasValue("StoryNode");
-                });
-
             modelBuilder.Entity("Backend.Models.Db.Node", b =>
                 {
                     b.HasOne("Backend.Models.Db.Story", "story")
                         .WithMany("Nodes")
-                        .HasForeignKey("StoryId")
+                        .HasForeignKey("storyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

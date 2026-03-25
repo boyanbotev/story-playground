@@ -1,0 +1,9 @@
+Story So Far: {{StorySoFar}}
+CharacterGoal: {{CharacterGoal}}
+Judge if the following text has let the character achieve their goal.
+Text to check: {{TextToCheck}}
+
+Answer without reasoning exactly in this format:
+YES
+or
+NO

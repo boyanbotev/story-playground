@@ -64,9 +64,9 @@ public static class StoryEndpoints
             }
         });
 
-        app.MapPost("/progress", async (ILLMService lLMService, IStoryService storyService, [FromBody] ProgressRequest progressRequest, Settings settings) =>
+        app.MapPost("/progress", async (ILLMService lLMService, IGameService gameService, [FromBody] ProgressRequest progressRequest, Settings settings) =>
         {
-            return await storyService.ProgressStory(progressRequest);
+            return await gameService.ProgressStory(progressRequest);
         });
     }
 }

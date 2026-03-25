@@ -9,6 +9,4 @@ public interface IStoryService
     Task<UpdateResult> UpdateStory(int id, UpdateStoryRequest updateStoryRequest);
     Task<RemoveResult> DeleteStory(int id);
     Task<Story[]> GetStories();
-    Task<bool> ValidateUserAction(string userAction, string storyStructure, string storySoFar);
-    Task<object> ProgressStory(ProgressRequest progressRequest);
 }

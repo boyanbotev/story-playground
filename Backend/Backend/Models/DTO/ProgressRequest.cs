@@ -17,6 +17,9 @@ public class ProgressRequest
     public int ContentTurnsRemaining { get; set; }
 
     [Required]
+    public string Goal { get; set; }
+
+    [Required]
     public string SummarySoFar { get; set; }
 
     [Required]

@@ -1,0 +1,11 @@
+{{SystemPrompt}}
+Story Style Guide: {{StyleGuide}}
+
+Summary of story so far: {{SummarySoFar}}
+
+=== CURRENT TURN ===
+User Action: {{UserAction}}
+Let the story unfold naturally, according to the User Action.
+{{Difficulty}}
+
+Write the next 40-70 words now:

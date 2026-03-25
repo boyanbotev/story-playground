@@ -25,32 +25,14 @@ public enum UpdateResult
     DoesNotExist
 }
 
-public class StoryStats
-{
-    public int NodeIndex { get; set; }
-    public int TransitionTurnsRemaining { get; set; }
-    public int ContentTurnsRemaining { get; set; }
-
-    public StoryStats(int nodeIndex, int transitionTurnsRemaining, int contentTurnsRemaining)
-    {
-        this.NodeIndex = nodeIndex;
-        this.TransitionTurnsRemaining = transitionTurnsRemaining;
-        this.ContentTurnsRemaining = contentTurnsRemaining;
-    }
-}
-
 public class StoryService : IStoryService
 {
     public StoryContext db { get; }
     public ILLMService LLMService { get; }
-    private IPromptService promptService;
-    private Settings settings;
     public StoryService(StoryContext storyContext, ILLMService lLMService, IPromptService promptService, Settings settings)
     {
         db = storyContext;
         LLMService = lLMService;
-        this.settings = settings;
-        this.promptService = promptService;
     }
 
     public async Task<Story[]> GetStories()
@@ -66,16 +48,28 @@ public class StoryService : IStoryService
         story.StartingSummary = addRequest.StartingSummary;
         story.Introduction = addRequest.Introduction;
 
-        story.Nodes = new List<StoryNode>();
+        story.Nodes = new List<Node>();
         foreach (var node in addRequest.Nodes)
         {
-            var storyNode = new StoryNode
+            switch (node)
             {
-                Content = node.Content,
-                TransitionTurns = node.TransitionTurns,
-                ContentTurns = node.ContentTurns,
-            };
-            story.Nodes.Add(storyNode);
+                case StoryNodeRequest storyNode:
+                    story.Nodes.Add(new StoryNode
+                    {
+                        Content = storyNode.Content,
+                        TransitionTurns = storyNode.TransitionTurns,
+                        ContentTurns = storyNode.ContentTurns,
+                    });
+                    break;
+                case QuestNodeRequest questNode:
+                    story.Nodes.Add(new QuestNode
+                    {
+                        Content = questNode.Content,
+                        UserGoal = questNode.UserGoal,
+                        Difficulty = questNode.Difficulty,
+                    });
+                    break;
+            }
         }
         Console.WriteLine(story.Nodes.Count);
 
@@ -109,13 +103,25 @@ public class StoryService : IStoryService
         story.Nodes.Clear();
         foreach (var node in updateStoryRequest.Nodes)
         {
-            var storyNode = new StoryNode
+            switch (node)
             {
-                Content = node.Content,
-                TransitionTurns = node.TransitionTurns,
-                ContentTurns = node.ContentTurns,
-            };
-            story.Nodes.Add(storyNode);
+                case StoryNodeRequest storyNode:
+                    story.Nodes.Add(new StoryNode
+                    {
+                        Content = storyNode.Content,
+                        TransitionTurns = storyNode.TransitionTurns,
+                        ContentTurns = storyNode.ContentTurns,
+                    });
+                    break;
+                case QuestNodeRequest questNode:
+                    story.Nodes.Add(new QuestNode
+                    {
+                        Content = questNode.Content,
+                        UserGoal = questNode.UserGoal,
+                        Difficulty = questNode.Difficulty,
+                    });
+                    break;
+            }
         }
 
         await db.SaveChangesAsync();
@@ -134,130 +140,5 @@ public class StoryService : IStoryService
         db.Stories.Remove(story);
         await db.SaveChangesAsync();
         return RemoveResult.Success;
-    }
-
-    public async Task<object> ProgressStory(ProgressRequest progressRequest)
-    {
-        var story = await GetStory(progressRequest.StoryId);
-
-        bool isValid = await ValidateUserAction(progressRequest.UserAction, story.Structure, progressRequest.SummarySoFar);
-        if (!isValid) return RejectUserAction();
-
-        string prompt = CreateProgressPrompt(progressRequest, story.Nodes[progressRequest.NodeIndex]);
-        string storyText = await LLMService.Generate(prompt);
-        var stats = GetUpdatedStats(progressRequest, storyText, story);
-        return await CreateProgressResponse(progressRequest, storyText, stats);
-    }
-
-    private static object RejectUserAction()
-    {
-        var error = "Invalid User Action";
-        var errorResponse = new
-        {
-            error,
-        };
-        return errorResponse;
-    }
-
-    public async Task<bool> ValidateUserAction(string userAction, string storyStructure, string storySoFar)
-    {
-        var template = promptService.Load("validate");
-        var prompt = promptService.Fill(template, new Dictionary<string, string>
-        {
-            { "StoryStructure", storyStructure },
-            { "StorySoFar", storySoFar },
-            { "UserAction", userAction },
-        });
-
-        string isTrue = await LLMService.Generate(prompt);
-        return isTrue.ToLower().Contains("yes");
-    }
-
-    private string CreateProgressPrompt(ProgressRequest progressRequest, StoryNode storyNode)
-    {
-        var nextNode = storyNode.Content;
-        var actionPrompt = promptService.Load("follow_user_action");
-        var transitionTemplate = promptService.Load("transition_to_node");
-        var experienceTemplate = promptService.Load("experience_node");
-        var continueTemplate = promptService.Load("continue_node");
-        var transitionPrompt = promptService.Fill(transitionTemplate, new Dictionary<string, string>
-        {
-            { "NextNode", nextNode },
-        });
-        var experiencePrompt = promptService.Fill(experienceTemplate, new Dictionary<string, string>
-        {
-            { "NextNode", nextNode },
-        });
-        var continuePrompt = promptService.Fill(continueTemplate, new Dictionary<string, string>
-        {
-            { "NextNode", nextNode },
-        });
-
-        bool isContinueTurn = progressRequest.ContentTurnsRemaining < storyNode.ContentTurns;
-        string steeringInstruction = progressRequest.TransitionTurnsRemaining switch
-        {
-            0 => isContinueTurn ? continuePrompt : experiencePrompt,
-            <= 2 => transitionPrompt,
-            _ => actionPrompt
-        };
-
-        string upcomingEventContext = progressRequest.TransitionTurnsRemaining <= 2
-            ? $"\n{settings.ForeshadowText}{nextNode}"
-            : "";
-
-        var template = promptService.Load("progress");
-        var prompt = promptService.Fill(template, new Dictionary<string, string>
-        {
-            { "SystemPrompt", settings.SystemPrompt },
-            { "StyleGuide", settings.StyleGuide },
-            { "SummarySoFar", progressRequest.SummarySoFar },
-            { "UpcomingEventContext", upcomingEventContext },
-            { "UserAction", progressRequest.UserAction },
-            { "SteeringInstruction", steeringInstruction },
-        });
-
-        return prompt;
-    }
-
-    private StoryStats GetUpdatedStats(ProgressRequest progressRequest, string storyText, Story story)
-    {
-        var nodeIndex = progressRequest.NodeIndex;
-        var transitionTurnsRemaining = progressRequest.TransitionTurnsRemaining;
-        var contentTurnsRemaining = progressRequest.ContentTurnsRemaining;
-
-        if (transitionTurnsRemaining > 0) transitionTurnsRemaining--;
-        else contentTurnsRemaining--;
-        
-        if (transitionTurnsRemaining < 1 && contentTurnsRemaining < 1)
-        {
-            nodeIndex++;
-            contentTurnsRemaining = story.Nodes[nodeIndex].ContentTurns;
-            transitionTurnsRemaining = story.Nodes[nodeIndex].TransitionTurns;
-        }
-
-        return new StoryStats(nodeIndex, transitionTurnsRemaining, contentTurnsRemaining);
-    }
-
-    private async Task<object> CreateProgressResponse(ProgressRequest progressRequest, string storyText, StoryStats stats)
-    {
-        var template = promptService.Load("summary");
-        var prompt = promptService.Fill(template, new Dictionary<string, string>
-        {
-            { "StoryText", storyText },
-            { "SummaryUnnecessaryPhrase", settings.SummaryUnnecessaryPhrase },
-        });
-
-        string summaryExtension = await LLMService.Generate(prompt);
-        summaryExtension = summaryExtension.Contains(settings.SummaryUnnecessaryPhrase) ? "" : summaryExtension;
-        string summarySoFar = progressRequest.SummarySoFar + " " + summaryExtension;
-        var response = new
-        {
-            storyText,
-            summarySoFar,
-            stats.NodeIndex,
-            stats.TransitionTurnsRemaining,
-            stats.ContentTurnsRemaining,
-        };
-        return response;
     }
 }

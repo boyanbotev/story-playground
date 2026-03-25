@@ -5,7 +5,7 @@ namespace Backend.Models.Db;
 public class StoryContext : DbContext
 {
     public DbSet<Story> Stories { get; set; }
-    public DbSet<StoryNode> StoryNodes { get; set; }
+    public DbSet<Node> Nodes { get; set; }
     public string DbPath { get; }
 
     public StoryContext(DbContextOptions<StoryContext> options) : base(options)
@@ -19,8 +19,15 @@ public class StoryContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<StoryNode>()
+        modelBuilder.Entity<Node>()
             .HasOne(sn => sn.story)
-            .WithMany(s => s.Nodes);
+            .WithMany(s => s.Nodes)
+            .HasForeignKey(sn => sn.StoryId);
+
+        modelBuilder.Entity<Node>()
+            .HasDiscriminator<string>("NodeType")
+            .HasValue<Node>("Node")
+            .HasValue<StoryNode>("StoryNode")
+            .HasValue<QuestNode>("QuestNode");
     }
 }
