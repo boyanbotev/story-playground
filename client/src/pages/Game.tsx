@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLoaderData } from 'react-router';
-import { requestProgress } from '../requests/requestProgress';
+import { requestProgress, type ProgressRequestProps } from '../requests/requestProgress';
 import { LoadingAnimation } from '../components/LoadingAnimation';
 
 export const Game = () => {
@@ -18,7 +18,20 @@ export const Game = () => {
         e.preventDefault();
         setIsLoading(true);
 
-        const response = await requestProgress(story.id, nodeIndex, action, runningSummary, transitionTurnsRemaining, contentTurnsRemaining);
+        var currentNode = story.nodes[nodeIndex];
+        let progressRequest: ProgressRequestProps = {                 
+            storyId: story.id,
+            nodeIndex: nodeIndex,
+            userAction: action,
+            summarySoFar: runningSummary,
+        };
+        if (currentNode.$type == "story") {
+            progressRequest = {...progressRequest, transitionTurnsRemaining, contentTurnsRemaining };
+        }
+        
+        console.log("request", progressRequest);
+
+        var response = await requestProgress(progressRequest);
 
         if (response.error) {
             setIsLoading(false);
@@ -27,7 +40,6 @@ export const Game = () => {
             return;
         }
 
-        console.log("request", action, runningSummary, transitionTurnsRemaining, story.nodes[nodeIndex].content, story.structure);
         console.log("response", response);
         
         setRunningSummary(response.summarySoFar);

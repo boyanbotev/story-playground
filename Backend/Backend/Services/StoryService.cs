@@ -130,7 +130,9 @@ public class StoryService : IStoryService
         } 
         // TODO: rearranging node order
         // confirmation before deleting story
-        // update game to send progress responses for questnodes correctly
+        // type correct not $type
+        // display user goal
+        // remove unnecessary 'content' field from questnode, and just have it in storynode
 
         await db.SaveChangesAsync();
         return UpdateResult.Success;

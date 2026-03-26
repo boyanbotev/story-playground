@@ -10,14 +10,9 @@ public class ProgressRequest
     [Required]
     public int NodeIndex { get; set; }
 
-    [Required]
     public int TransitionTurnsRemaining { get; set; }
     
-    [Required]
     public int ContentTurnsRemaining { get; set; }
-
-    [Required]
-    public string Goal { get; set; }
 
     [Required]
     public string SummarySoFar { get; set; }
