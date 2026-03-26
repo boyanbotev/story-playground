@@ -130,7 +130,6 @@ public class StoryService : IStoryService
         } 
         // TODO: rearranging node order
         // type correct not $type
-        // display user goal
         // remove unnecessary 'content' field from questnode, and just have it in storynode
 
         await db.SaveChangesAsync();

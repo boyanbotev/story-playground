@@ -8,6 +8,7 @@ export const Game = () => {
     const [ runningSummary, setRunningSummary ] = useState<string>(story.startingSummary);
     const [ transitionTurnsRemaining, setTransitionTurnsRemaining ] = useState<number>(story.nodes[0].transitionTurns);
     const [ contentTurnsRemaining, setContentTurnsRemaining ] = useState<number>(story.nodes[0].contentTurns);
+    const [ goal, setGoal ] = useState<string>(story.nodes[0].userGoal);
     const [ nodeIndex, setNodeIndex ] = useState<number>(0);
     const [ action, setAction ] = useState<string>("");
     const [ storyText, setStoryText ] = useState<string>(story.introduction);
@@ -50,6 +51,7 @@ export const Game = () => {
         setNodeIndex(response.nodeIndex);
         setIsLoading(false);
         setError("");
+        setGoal(response.userGoal);
     }
 
     return isLoading ? (
@@ -57,8 +59,11 @@ export const Game = () => {
     ) : (
         <div>
             <h1>{story.name}</h1>
-            <p>{storyText}</p>
+            {story.nodes[nodeIndex].$type == "quest" ? (
+                <div className='goal'><p>Goal: {goal}</p></div>
+            ) : null}
             <p className={"error"}>{error}</p>
+            <p>{storyText}</p>
             <form className="form" onSubmit={submitAction}>
                 <label>
                     Write your action here:
