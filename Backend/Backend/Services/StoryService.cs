@@ -66,7 +66,6 @@ public class StoryService : IStoryService
                 case QuestNodeRequest questNode:
                     story.Nodes.Add(new QuestNode
                     {
-                        Content = questNode.Content,
                         UserGoal = questNode.UserGoal,
                         Difficulty = questNode.Difficulty,
                         Order = order++,
@@ -120,7 +119,6 @@ public class StoryService : IStoryService
                 case QuestNodeRequest questNode:
                     story.Nodes.Add(new QuestNode
                     {
-                        Content = questNode.Content,
                         UserGoal = questNode.UserGoal,
                         Difficulty = questNode.Difficulty,
                         Order = order++,
@@ -130,7 +128,6 @@ public class StoryService : IStoryService
         } 
         // TODO: rearranging node order
         // type correct not $type
-        // remove unnecessary 'content' field from questnode, and just have it in storynode
 
         await db.SaveChangesAsync();
         return UpdateResult.Success;

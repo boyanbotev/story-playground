@@ -39,7 +39,6 @@ export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
                 if (n.type === "quest") {
                     return {
                         type: "quest",
-                        content: n.content,
                         userGoal: n.userGoal,
                         difficulty: n.difficulty
                     };
@@ -112,13 +111,13 @@ export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
                             <option value="story">Story Node</option>
                             <option value="quest">Quest Node</option>
                         </select>
-                        <textarea
-                            value={node.content}
-                            placeholder="Content"
-                            onChange={e => updateNode(i, "content", e.target.value)}
-                        />
                         {node.type === "story" && (
                             <>
+                                <textarea
+                                    value={node.content}
+                                    placeholder="Content"
+                                    onChange={e => updateNode(i, "content", e.target.value)}
+                                />
                                 <label>
                                     Transition Turns:
                                     <input

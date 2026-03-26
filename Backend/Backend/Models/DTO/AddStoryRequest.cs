@@ -24,7 +24,7 @@ public class AddStoryRequest
 [JsonDerivedType(typeof(QuestNodeRequest), "quest")]
 public abstract class NodeRequest
 {
-    public string Content { get; set; }
+
 }
 
 public class StoryNodeRequest : NodeRequest
@@ -34,6 +34,9 @@ public class StoryNodeRequest : NodeRequest
 
     [Required]
     public int ContentTurns { get; set; }
+
+    [Required]
+    public string Content { get; set; }
 }
 
 public class QuestNodeRequest : NodeRequest

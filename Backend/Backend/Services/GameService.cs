@@ -190,7 +190,6 @@ public class GameService : IGameService
             var status = new StoryStatus();
             status.UserGoal = questNode.UserGoal;
             status.Difficulty = questNode.Difficulty;
-            status.Content = questNode.Content;
             status.NodeIndex = nodeIndex;
             return status;
         }
