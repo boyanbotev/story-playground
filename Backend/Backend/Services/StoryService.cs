@@ -126,8 +126,10 @@ public class StoryService : IStoryService
                     break;
             }
         } 
-        // TODO: rearranging node order
+        // TODO: rearranging node order + add node in between other nodes
         // type correct not $type
+        // separate node type for end of the story!
+        // quest complete text
 
         await db.SaveChangesAsync();
         return UpdateResult.Success;
