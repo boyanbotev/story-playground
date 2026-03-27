@@ -53,7 +53,14 @@ public class GameService : IGameService
             QuestNode questNode = node as QuestNode;
             string prompt = CreateQuestPrompt(progressRequest, questNode);
             storyText = await LLMService.Generate(prompt);
-            status = await GetQuestStats(progressRequest, story, storyText, questNode);
+            status = await GetQuestStatus(progressRequest, story, storyText, questNode);
+        }
+
+        if (status == null) {
+                return new {
+                completed = true,
+                storyText,
+            };
         }
 
         var summarySoFar = await GenerateSummary(progressRequest, storyText);
@@ -172,6 +179,7 @@ public class GameService : IGameService
     private StoryStatus GetNextNodeResponse(ProgressRequest progressRequest, Story story)
     {
         var nodeIndex = progressRequest.NodeIndex + 1;
+        if (nodeIndex >= story.Nodes.Count) return null;
         var nextNode = story.Nodes[nodeIndex];
 
         if (nextNode is StoryNode)
@@ -195,7 +203,7 @@ public class GameService : IGameService
         }
     }
 
-    private async Task<StoryStatus> GetQuestStats(ProgressRequest progressRequest, Story story, string storyText, QuestNode questNode)
+    private async Task<StoryStatus> GetQuestStatus(ProgressRequest progressRequest, Story story, string storyText, QuestNode questNode)
     {
         bool isGoalReached = await IsGoalReached(storyText, questNode.UserGoal, progressRequest.SummarySoFar);
         if (isGoalReached)

@@ -13,6 +13,7 @@ export const Game = () => {
     const [ action, setAction ] = useState<string>("");
     const [ storyText, setStoryText ] = useState<string>(story.introduction);
     const [ isLoading, setIsLoading ] = useState<boolean>(false);
+    const [ isStoryComplete, setIsStoryComplete ] = useState<boolean>(false);
     const [ error, setError ] = useState<string>("");
 
     const submitAction = async (e: React.SubmitEvent) => {
@@ -41,6 +42,14 @@ export const Game = () => {
             return;
         }
 
+        if (response.completed) {
+            setIsLoading(false);
+            setAction("");
+            setStoryText(response.storyText);
+            setIsStoryComplete(true);
+            return;
+        }
+
         console.log("response", response);
         
         setRunningSummary(response.summarySoFar);
@@ -56,6 +65,13 @@ export const Game = () => {
 
     return isLoading ? (
         <LoadingAnimation />
+    ) : isStoryComplete ? (
+        <div>
+            <h1>{story.name}</h1>
+            <p>{storyText}</p>
+            <b>THE END</b>
+            <p><i>You have completed the story!</i></p>
+        </div>
     ) : (
         <div>
             <h1>{story.name}</h1>
