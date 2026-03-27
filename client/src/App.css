@@ -109,3 +109,8 @@ textarea {
 .goal {
   color: #a7baff;
 }
+
+.quest-complete {
+  color: #a7baff;
+  font-weight: bold;
+}

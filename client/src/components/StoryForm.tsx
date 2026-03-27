@@ -94,11 +94,13 @@ export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
             <div className={"tips"}>
                 <i>Node Writing Tips</i>
                 <ul>
+                    <h4>StoryNodes</h4>
                     <li>The transition turns are the number of turns it takes for the character to transition to/ foreshadow the content of the node.</li>
                     <li>The content turns is how many turns the game stays on the content of the node.</li>
                     <li>Try to keep the transition turns and content turns as low as possible. (eg. 1 or 2)</li>
                     <li>Avoid introducing objects without being clear about what they are. Eg. prefer "Bashar finds a very valuable pearl" to "Bashar finds a very valuable object"</li>
-                    <li> Use named characters or very specific descriptions (the one-eyed man) to avoid confusing the LLM</li>
+                    <li>Use named characters or very specific descriptions (the one-eyed man) to avoid confusing the LLM</li>
+                    <li>Finish with a Story node, not a Quest node.</li>
                 </ul>
             </div>
             <div className="nodes">

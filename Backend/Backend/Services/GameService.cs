@@ -13,6 +13,7 @@ public class StoryStatus
     public int? ContentTurnsRemaining { get; set; }
     public string? UserGoal { get; set; }
     public string? Difficulty { get; set; }
+    public string? QuestCompleteText { get; set; }
 
 }
 
@@ -74,6 +75,7 @@ public class GameService : IGameService
             status.ContentTurnsRemaining,
             status.UserGoal,
             status.Difficulty,
+            status.QuestCompleteText,
         };
     }
 
@@ -208,7 +210,9 @@ public class GameService : IGameService
         bool isGoalReached = await IsGoalReached(storyText, questNode.UserGoal, progressRequest.SummarySoFar);
         if (isGoalReached)
         {
-            return GetNextNodeResponse(progressRequest, story);
+            var nextNodeStatus = GetNextNodeResponse(progressRequest, story);
+            nextNodeStatus.QuestCompleteText = $"QUEST COMPLETE: {questNode.UserGoal}";
+            return nextNodeStatus;
         }
 
         var status = new StoryStatus();

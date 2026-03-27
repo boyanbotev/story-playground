@@ -9,6 +9,7 @@ export const Game = () => {
     const [ transitionTurnsRemaining, setTransitionTurnsRemaining ] = useState<number>(story.nodes[0].transitionTurns);
     const [ contentTurnsRemaining, setContentTurnsRemaining ] = useState<number>(story.nodes[0].contentTurns);
     const [ goal, setGoal ] = useState<string>(story.nodes[0].userGoal);
+    const [ questCompleteText, setQuestCompleteText ] = useState<string | null>(null);
     const [ nodeIndex, setNodeIndex ] = useState<number>(0);
     const [ action, setAction ] = useState<string>("");
     const [ storyText, setStoryText ] = useState<string>(story.introduction);
@@ -50,6 +51,9 @@ export const Game = () => {
             return;
         }
 
+        if (response.questCompleteText) setQuestCompleteText(response.questCompleteText);
+        else setQuestCompleteText(null);
+
         console.log("response", response);
         
         setRunningSummary(response.summarySoFar);
@@ -77,6 +81,9 @@ export const Game = () => {
             <h1>{story.name}</h1>
             {story.nodes[nodeIndex].$type == "quest" ? (
                 <div className='goal'><p>Goal: {goal}</p></div>
+            ) : null}
+            {questCompleteText ? (
+                <div className='quest-complete'><p>{questCompleteText}</p></div>
             ) : null}
             <p className={"error"}>{error}</p>
             <p>{storyText}</p>

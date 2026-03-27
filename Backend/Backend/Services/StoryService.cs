@@ -128,7 +128,6 @@ public class StoryService : IStoryService
         } 
         // TODO: rearranging node order + add node in between other nodes
         // type correct not $type
-        // quest complete text
 
         await db.SaveChangesAsync();
         return UpdateResult.Success;
