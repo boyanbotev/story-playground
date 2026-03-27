@@ -126,7 +126,7 @@ public class StoryService : IStoryService
                     break;
             }
         } 
-        // TODO: rearranging node order + add node in between other nodes
+        // TODO:
         // type correct not $type
 
         await db.SaveChangesAsync();

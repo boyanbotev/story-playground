@@ -114,3 +114,7 @@ textarea {
   color: #a7baff;
   font-weight: bold;
 }
+
+.node-buttons {
+  display: flex;
+}

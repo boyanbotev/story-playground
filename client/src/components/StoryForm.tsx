@@ -1,20 +1,23 @@
 import { useState } from "react";
 import type { Story } from "../dto/Story";
 import type { StoryNode } from "../dto/StoryNode";
+import { NodeEditor } from "./NodeEditor";
 
 type StoryFormProps = {
     initialStory: Partial<Story>;
     onSubmit: (story: Story) => Promise<void>;
 };
 
+type StoryNodeWithId = StoryNode & { idString: string };
+
 export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
     const [name, setName] = useState(initialStory.name ?? "");
     const [structure, setStructure] = useState(initialStory.structure ?? "");
     const [startingSummary, setStartingSummary] = useState(initialStory.startingSummary ?? "");
     const [introduction, setIntroduction] = useState(initialStory.introduction ?? "");
-    const [nodes, setNodes] = useState<StoryNode[]>(
-        initialStory.nodes?.map(n => ({ ...n, type: n.type ?? (n.difficulty ? "quest" : "story") })) 
-            ?? [{ type: "story", content: "", transitionTurns: 0, contentTurns: 0 }]
+    const [nodes, setNodes] = useState<StoryNodeWithId[]>(
+        initialStory.nodes?.map(n => ({ ...n, idString: crypto.randomUUID(), type: n.type ?? (n.difficulty ? "quest" : "story") })) 
+            ?? [{ idString: crypto.randomUUID(), type: "story", content: "", transitionTurns: 0, contentTurns: 0 }]
     );
 
     const submit = async (e: React.FormEvent) => {
@@ -50,8 +53,18 @@ export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
         await onSubmit(story);
     };
 
+    const moveNode = (from: number, to: number) => {
+        if (to < 0 || to >= nodes.length) return;
+
+        const updated = [...nodes];
+        const [moved] = updated.splice(from, 1);
+        updated.splice(to, 0, moved);
+
+        setNodes(updated);
+    };
+
     const addNode = () => {
-        setNodes([...nodes, { type: "story", content: "", transitionTurns: 0, contentTurns: 0 }]);
+        setNodes([...nodes, { idString: crypto.randomUUID(), type: "story", content: "", transitionTurns: 0, contentTurns: 0 }]);
     };
 
     const removeNode = (index: number) => {
@@ -60,21 +73,11 @@ export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
 
     const updateNode = (
         index: number,
-        field: keyof StoryNode,
-        value: string
+        updatedNode: StoryNodeWithId,
     ) => {
         const updated = [...nodes];
 
-        updated[index] = {
-            ...updated[index],
-            [field]:
-                field === "content" ||
-                field === "type" ||
-                field === "userGoal" ||
-                field === "difficulty"
-                    ? value
-                    : Number(value)
-        };
+        updated[index] = updatedNode;
 
         setNodes(updated);
     };
@@ -105,62 +108,14 @@ export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
             </div>
             <div className="nodes">
                 {nodes.map((node, i) => (
-                    <div className="node" key={i}>
-                        <select
-                            value={node.type}
-                            onChange={e => updateNode(i, "type", e.target.value)}
-                        >
-                            <option value="story">Story Node</option>
-                            <option value="quest">Quest Node</option>
-                        </select>
-                        {node.type === "story" && (
-                            <>
-                                <textarea
-                                    value={node.content}
-                                    placeholder="Content"
-                                    onChange={e => updateNode(i, "content", e.target.value)}
-                                />
-                                <label>
-                                    Transition Turns:
-                                    <input
-                                        type="number"
-                                        value={node.transitionTurns ?? 0}
-                                        onChange={e => updateNode(i, "transitionTurns", e.target.value)}
-                                    />
-                                </label>
-
-                                <label>
-                                    Content Turns:
-                                    <input
-                                        type="number"
-                                        value={node.contentTurns ?? 0}
-                                        onChange={e => updateNode(i, "contentTurns", e.target.value)}
-                                    />
-                                </label>
-                            </>
-                        )}
-
-                        {node.type === "quest" && (
-                            <>
-                                <label>
-                                    User Goal:
-                                    <input
-                                        value={node.userGoal ?? ""}
-                                        onChange={e => updateNode(i, "userGoal", e.target.value)}
-                                    />
-                                </label>
-
-                                <label>
-                                    Difficulty:
-                                    <input
-                                        value={node.difficulty ?? ""}
-                                        onChange={e => updateNode(i, "difficulty", e.target.value)}
-                                    />
-                                </label>
-                            </>
-                        )}
-                        <button type="button" onClick={() => removeNode(i)}>Remove</button>
-                    </div>
+                    <NodeEditor
+                        key={node.idString}
+                        node={node}
+                        onChange={(updated) => updateNode(i, { ...nodes[i], ...updated })}
+                        onRemove={() => removeNode(i)}
+                        onMoveUp={() => moveNode(i, i - 1)}
+                        onMoveDown={() => moveNode(i, i + 1)}
+                    />
                 ))}
             </div>
 
