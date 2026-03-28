@@ -6,5 +6,6 @@ export type Story = {
     structure: string,
     startingSummary: string,
     introduction: string,
+    mainCharacterName: string,
     nodes: StoryNode[]
 }

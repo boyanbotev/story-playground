@@ -14,6 +14,8 @@ public class UpdateStoryRequest
     public string StartingSummary { get; set; }
     [Required]
     public string Introduction { get; set; }
+    [Required]
+    public string MainCharacterName { get; set; }
 
     [Required]
     public List<NodeRequest> Nodes { get; set; }

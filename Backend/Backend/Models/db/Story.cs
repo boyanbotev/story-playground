@@ -10,6 +10,7 @@ public class Story
     public string Structure { get; set; }
     public string StartingSummary { get; set; }
     public string Introduction { get; set; }
+    public string MainCharacterName { get; set; }
     public List<Node> Nodes { get; set; }
 
     public Story() {}

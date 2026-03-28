@@ -1,0 +1,12 @@
+Judge if the following user action is controlling {{MainCharacter}} or someone else.
+CRITICAL: reject ANY actions that attempt to control someone other than {{MainCharacter}}. (eg. accept '{{MainCharacter}} smiles', reject 'Ben (or any other character) goes inside.')
+CRITICAL: reject any actions that contain within them their own results (eg. 'successfully kill guard' or 'be crowned king.')
+User Action: {{UserAction}}
+
+Answer without reasoning exactly in this format:
+YES
+or
+NO
+
+Answer YES if the user action is an action {{MainCharacter}} is taking
+Answer NO if the user action is controlling someone else or contains a result

@@ -47,6 +47,7 @@ public class StoryService : IStoryService
         story.Structure = addRequest.Structure;
         story.StartingSummary = addRequest.StartingSummary;
         story.Introduction = addRequest.Introduction;
+        story.MainCharacterName = addRequest.MainCharacterName;
 
         story.Nodes = new List<Node>();
         int order = 0;
@@ -100,6 +101,7 @@ public class StoryService : IStoryService
         story.Structure = updateStoryRequest.Structure;
         story.StartingSummary = updateStoryRequest.StartingSummary;
         story.Introduction = updateStoryRequest.Introduction;
+        story.MainCharacterName = updateStoryRequest.MainCharacterName;
 
         story.Nodes.Clear();
         int order = 0;

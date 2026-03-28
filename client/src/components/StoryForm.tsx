@@ -15,6 +15,7 @@ export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
     const [structure, setStructure] = useState(initialStory.structure ?? "");
     const [startingSummary, setStartingSummary] = useState(initialStory.startingSummary ?? "");
     const [introduction, setIntroduction] = useState(initialStory.introduction ?? "");
+    const [mainCharacterName, setMainCharacterName] = useState(initialStory.mainCharacterName ?? "");
     const [nodes, setNodes] = useState<StoryNodeWithId[]>(
         initialStory.nodes?.map(n => ({ ...n, idString: crypto.randomUUID(), type: n.type ?? (n.difficulty ? "quest" : "story") })) 
             ?? [{ idString: crypto.randomUUID(), type: "story", content: "", transitionTurns: 0, contentTurns: 0 }]
@@ -29,6 +30,7 @@ export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
             structure,
             startingSummary,
             introduction,
+            mainCharacterName,
             nodes: nodes.map(n => {
                 if (n.type === "story") {
                     return {
@@ -90,6 +92,8 @@ export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
             <textarea value={structure} onChange={e => setStructure(e.target.value)} />
             <label> Introduction </label>
             <textarea value={introduction} onChange={e => setIntroduction(e.target.value)} />
+            <label> Main Character Name </label>
+            <input value={mainCharacterName} onChange={e => setMainCharacterName(e.target.value)} />
             <label> Starting Summary </label>
             <textarea value={startingSummary} onChange={e => setStartingSummary(e.target.value)} />
 

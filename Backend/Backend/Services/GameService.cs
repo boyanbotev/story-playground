@@ -35,8 +35,9 @@ public class GameService : IGameService
     {
         var story = await storyService.GetStory(progressRequest.StoryId);
 
-        bool isValid = await ValidateUserAction(progressRequest.UserAction, story.Structure, progressRequest.SummarySoFar);
-        if (!isValid) return RejectUserAction();
+        bool isPlausible = await ValidateUserAction(progressRequest.UserAction, story.Structure, progressRequest.SummarySoFar);
+        bool isControllingCorrectCharacter = await ValidateActionCharacter(progressRequest.UserAction, story.MainCharacterName);
+        if (!isPlausible || !isControllingCorrectCharacter) return RejectUserAction();
 
         var node = story.Nodes[progressRequest.NodeIndex];
 
@@ -91,13 +92,27 @@ public class GameService : IGameService
 
     private async Task<bool> ValidateUserAction(string userAction, string storyStructure, string storySoFar)
     {
-        var template = promptService.Load("validate");
+        var template = promptService.Load("validate_action_plausibility");
         var prompt = promptService.Fill(template, new Dictionary<string, string>
         {
             { "StoryStructure", storyStructure },
             { "StorySoFar", storySoFar },
             { "UserAction", userAction },
         });
+
+        string isTrue = await LLMService.Generate(prompt);
+        return isTrue.ToLower().Contains("yes");
+    }
+
+    private async Task<bool> ValidateActionCharacter(string userAction, string mainCharacter)
+    {
+        var template = promptService.Load("validate_action_character");
+        var prompt = promptService.Fill(template, new Dictionary<string, string>
+        {
+            { "MainCharacter", mainCharacter },
+            { "UserAction", userAction },
+        });
+        Console.WriteLine(prompt);
 
         string isTrue = await LLMService.Generate(prompt);
         return isTrue.ToLower().Contains("yes");
