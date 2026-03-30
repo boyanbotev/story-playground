@@ -32,8 +32,7 @@ public class ValidationService : IValidationService
             { "UserAction", userAction },
         });
 
-        string isTrue = await LLMService.Generate(prompt);
-        return isTrue.ToLower().Contains("yes");
+        return await Validate(prompt);
     }
 
     private async Task<bool> ValidateCharacter(string userAction, string mainCharacter)
@@ -45,7 +44,18 @@ public class ValidationService : IValidationService
             { "UserAction", userAction },
         });
 
+        return await Validate(prompt);
+    }
+
+    public async Task<bool> Validate(string prompt)
+    {
         string isTrue = await LLMService.Generate(prompt);
-        return isTrue.ToLower().Contains("yes");
+        
+        var normalized = isTrue.Trim().ToUpper();
+
+        if (normalized == "YES") return true;
+        if (normalized == "NO") return false;
+
+        throw new Exception("Validation prompt failed to return YES or NO. Prompt: " + prompt + " Result: " + isTrue);
     }
 }

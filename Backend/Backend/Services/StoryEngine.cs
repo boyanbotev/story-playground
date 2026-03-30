@@ -7,11 +7,13 @@ public class StoryEngine : IStoryEngine
     IPromptBuilder promptBuilder;
     ILLMService LLMService;
     IPromptService promptService;
-    public StoryEngine(IPromptBuilder promptBuilder, ILLMService lLMService, IPromptService promptService)
+    IValidationService validationService;
+    public StoryEngine(IPromptBuilder promptBuilder, ILLMService lLMService, IPromptService promptService, IValidationService validationService)
     {
         this.promptBuilder = promptBuilder;
         this.LLMService = lLMService;
         this.promptService = promptService;
+        this.validationService = validationService;
     }
 
     public async Task<ProgressResponse> ProcessTurn(ProgressRequest progressRequest, Story story)
@@ -79,8 +81,7 @@ public class StoryEngine : IStoryEngine
             { "StorySoFar", storySoFar },
         });
 
-        string isTrue = await LLMService.Generate(prompt);
-        return isTrue.ToLower().Contains("yes");
+        return await validationService.Validate(prompt);
     }
 
     private async Task<ProgressResponse> GetQuestStatus(ProgressRequest progressRequest, Story story, string storyText, QuestNode questNode)
