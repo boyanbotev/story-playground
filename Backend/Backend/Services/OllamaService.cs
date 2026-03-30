@@ -5,9 +5,11 @@ namespace Backend.Services;
 public class OllamaService : ILLMService
 {
     private readonly HttpClient _client;
-    public OllamaService(HttpClient client)
+    private readonly ILogger<OllamaService> _logger;
+    public OllamaService(HttpClient client, ILogger<OllamaService> logger)
     {
         _client = client;
+        _logger = logger;
     }
 
     public async Task<string> Generate(string prompt, CancellationToken cancellationToken)
@@ -27,7 +29,7 @@ public class OllamaService : ILLMService
         dynamic obj = JsonConvert.DeserializeObject(result);
         string text = obj.response;
 
-        Console.WriteLine(text);
+        _logger.LogInformation(text);
 
         return text;
     }

@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using Backend.Services;
 using Backend.Models;
+using Backend.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddHttpClient();
+builder.Logging.AddConsole();
 builder.Services.AddScoped<IPromptService, PromptService>();
 builder.Services.AddScoped<ILLMService, OllamaService>();
 builder.Services.AddScoped<IStoryService, StoryService>();
@@ -39,6 +41,7 @@ if (app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.MapStoryEndpoints();
 

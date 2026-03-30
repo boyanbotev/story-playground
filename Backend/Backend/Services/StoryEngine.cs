@@ -6,14 +6,12 @@ public class StoryEngine : IStoryEngine
 {
     IPromptBuilder promptBuilder;
     ILLMService LLMService;
-    IPromptService promptService;
     IValidationService validationService;
-    public StoryEngine(IPromptBuilder promptBuilder, ILLMService lLMService, IPromptService promptService, IValidationService validationService)
+    public StoryEngine(IPromptBuilder promptBuilder, ILLMService lLMService, IValidationService validationService)
     {
         this.promptBuilder = promptBuilder;
-        this.LLMService = lLMService;
-        this.promptService = promptService;
         this.validationService = validationService;
+        this.LLMService = lLMService;
     }
 
     public async Task<ProgressResponse> ProcessTurn(ProgressRequest progressRequest, Story story, CancellationToken cancellationToken)
