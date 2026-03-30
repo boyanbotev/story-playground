@@ -103,7 +103,7 @@ public class StoryService : IStoryService
         story.Introduction = updateStoryRequest.Introduction;
         story.MainCharacterName = updateStoryRequest.MainCharacterName;
 
-        story.Nodes.Clear();
+        story.Nodes.RemoveRange(0, story.Nodes.Count);
         int order = 0;
         foreach (var node in updateStoryRequest.Nodes)
         {

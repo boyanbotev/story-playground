@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Backend.Models;
 using Backend.Models.DTO;
 using Backend.Services;
-using System.Net;
 
 public static class StoryEndpoints
 {
@@ -14,13 +13,13 @@ public static class StoryEndpoints
             switch(result)
             {
                 case AddResult.Success:
-                    return HttpStatusCode.Created;
+                    return Results.Created();
                 case AddResult.AlreadyExists:
-                    return HttpStatusCode.Conflict;
+                    return Results.Conflict();
                 case AddResult.Invalid:
-                    return HttpStatusCode.BadRequest;
+                    return Results.BadRequest();
                 default:
-                    return HttpStatusCode.InternalServerError;
+                    return Results.InternalServerError();
             }
         });
 
@@ -30,11 +29,11 @@ public static class StoryEndpoints
             switch(result)
             {
                 case RemoveResult.Success:
-                    return HttpStatusCode.OK;
+                    return Results.Ok();
                 case RemoveResult.DoesNotExist:
-                    return HttpStatusCode.NotFound;
+                    return Results.NotFound();
                 default:
-                    return HttpStatusCode.InternalServerError;
+                    return Results.InternalServerError();
             }
         });
 
@@ -56,11 +55,11 @@ public static class StoryEndpoints
             switch(result)
             {
                 case UpdateResult.Success:
-                    return HttpStatusCode.OK;
+                    return Results.Ok();
                 case UpdateResult.DoesNotExist:
-                    return HttpStatusCode.NotFound;
+                    return Results.NotFound();
                 default:
-                    return HttpStatusCode.InternalServerError;
+                    return Results.InternalServerError();
             }
         });
 
