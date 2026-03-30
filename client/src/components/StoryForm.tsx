@@ -20,6 +20,7 @@ export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
         initialStory.nodes?.map(n => ({ ...n, idString: crypto.randomUUID(), type: n.type ?? (n.difficulty ? "quest" : "story") })) 
             ?? [{ idString: crypto.randomUUID(), type: "story", content: "", transitionTurns: 0, contentTurns: 0 }]
     );
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const submit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -52,7 +53,12 @@ export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
                 throw new Error("Unknown node type");
             })
         };
+
+        if (isSubmitting) return;
+        
+        setIsSubmitting(true);
         await onSubmit(story);
+        setIsSubmitting(false);
     };
 
     const moveNode = (from: number, to: number) => {
