@@ -2,20 +2,6 @@ using Backend.Models.Db;
 using Backend.Models.DTO;
 
 namespace Backend.Services;
-
-public class StoryStatus
-{
-    public int NodeIndex { get; set; }
-    public string Content { get; set; }
-    public int? TransitionTurnsRemaining { get; set; }
-    public int? ContentTurnsRemaining { get; set; }
-    public string? UserGoal { get; set; }
-    public string? Difficulty { get; set; }
-    public string? QuestCompleteText { get; set; }
-    public string StoryText { get; set; }
-    public bool Completed { get; set; }
-}
-
 public class StoryEngine : IStoryEngine
 {
     IPromptBuilder promptBuilder;
@@ -28,12 +14,12 @@ public class StoryEngine : IStoryEngine
         this.promptService = promptService;
     }
 
-    public async Task<StoryStatus> ProcessTurn(ProgressRequest progressRequest, Story story)
+    public async Task<ProgressResponse> ProcessTurn(ProgressRequest progressRequest, Story story)
     {
         var node = story.Nodes[progressRequest.NodeIndex];
 
         string storyText;
-        StoryStatus status;
+        ProgressResponse status;
 
         if (node is StoryNode)
         {
@@ -53,22 +39,21 @@ public class StoryEngine : IStoryEngine
         return status;
     }
     
-    private StoryStatus GetNextNodeResponse(ProgressRequest progressRequest, Story story)
+    private ProgressResponse GetNextNodeResponse(ProgressRequest progressRequest, Story story)
     {
-        var status = new StoryStatus();
+        var status = new ProgressResponse();
         var nodeIndex = progressRequest.NodeIndex + 1;
         if (nodeIndex >= story.Nodes.Count)
         {
             status.Completed = true;
             return status;
         }
-        
+
         var nextNode = story.Nodes[nodeIndex];
 
         if (nextNode is StoryNode)
         {
             var storyNode = nextNode as StoryNode;
-            status.Content = storyNode.Content;
             status.TransitionTurnsRemaining = storyNode.TransitionTurns;
             status.ContentTurnsRemaining = storyNode.ContentTurns;
             status.NodeIndex = nodeIndex;
@@ -98,7 +83,7 @@ public class StoryEngine : IStoryEngine
         return isTrue.ToLower().Contains("yes");
     }
 
-    private async Task<StoryStatus> GetQuestStatus(ProgressRequest progressRequest, Story story, string storyText, QuestNode questNode)
+    private async Task<ProgressResponse> GetQuestStatus(ProgressRequest progressRequest, Story story, string storyText, QuestNode questNode)
     {
         bool isGoalReached = await IsGoalReached(storyText, questNode.UserGoal, progressRequest.SummarySoFar);
         if (isGoalReached)
@@ -108,14 +93,14 @@ public class StoryEngine : IStoryEngine
             return nextNodeStatus;
         }
 
-        var status = new StoryStatus();
+        var status = new ProgressResponse();
         status.NodeIndex = progressRequest.NodeIndex;
         status.Difficulty = (story.Nodes[progressRequest.NodeIndex] as QuestNode).Difficulty;
         status.UserGoal = (story.Nodes[progressRequest.NodeIndex] as QuestNode).UserGoal;
         return status;
     }
 
-    private StoryStatus GetStatus(ProgressRequest progressRequest, string storyText, Story story)
+    private ProgressResponse GetStatus(ProgressRequest progressRequest, string storyText, Story story)
     {
         var nodeIndex = progressRequest.NodeIndex;
         var transitionTurnsRemaining = progressRequest.TransitionTurnsRemaining;
@@ -129,7 +114,7 @@ public class StoryEngine : IStoryEngine
             return GetNextNodeResponse(progressRequest, story);
         }
 
-        StoryStatus status = new StoryStatus();
+        ProgressResponse status = new();
         status.NodeIndex = nodeIndex;
         status.TransitionTurnsRemaining = transitionTurnsRemaining;
         status.ContentTurnsRemaining = contentTurnsRemaining;

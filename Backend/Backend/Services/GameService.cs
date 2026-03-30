@@ -24,18 +24,13 @@ public class GameService : IGameService
 
         if (!await validationService.ValidateUserAction(progressRequest, story)) return RejectUserAction();
 
-        var result = await storyEngine.ProcessTurn(progressRequest, story);
-        
-        if (result.Completed) {
-                return new {
-                completed = true,
-                storyText = result.StoryText,
-            };
-        }
+        var progressResponse = await storyEngine.ProcessTurn(progressRequest, story);
 
-        var summarySoFar = await summaryService.GenerateSummary(progressRequest, result.StoryText);
+        progressResponse.SummarySoFar = progressResponse.Completed 
+            ? progressRequest.SummarySoFar 
+            : await summaryService.GenerateSummary(progressRequest, progressResponse.StoryText);
 
-        return MapResponse(result, summarySoFar);
+        return progressResponse;
     }
 
     private static object RejectUserAction()
@@ -46,20 +41,5 @@ public class GameService : IGameService
             error,
         };
         return errorResponse;
-    }
-
-    public object MapResponse(StoryStatus status, string summarySoFar)
-    {
-        return new
-        {
-            status.StoryText,
-            summarySoFar,
-            status.NodeIndex,
-            status.TransitionTurnsRemaining,
-            status.ContentTurnsRemaining,
-            status.UserGoal,
-            status.Difficulty,
-            status.QuestCompleteText,
-        };
     }
 }
