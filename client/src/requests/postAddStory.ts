@@ -1,12 +1,13 @@
 import type { Story } from "../dto/Story";
 
-export const postAddStory = async (story: Story) => {
+export const postAddStory = async (story: Story, signal?: AbortSignal) => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
-    await fetch(`${baseUrl}\stories`, {
+    await fetch(`${baseUrl}/stories`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(story),
+        signal,
     });
 }

@@ -2,7 +2,6 @@
 using Backend.Models.Db;
 using Backend.Models.DTO;
 using Microsoft.EntityFrameworkCore;
-using Backend.Models;
 
 namespace Backend.Services;
 
@@ -29,18 +28,18 @@ public class StoryService : IStoryService
 {
     public StoryContext db { get; }
     public ILLMService LLMService { get; }
-    public StoryService(StoryContext storyContext, ILLMService lLMService, IPromptService promptService, Settings settings)
+    public StoryService(StoryContext storyContext, ILLMService lLMService)
     {
         db = storyContext;
         LLMService = lLMService;
     }
 
-    public async Task<Story[]> GetStories()
+    public async Task<Story[]> GetStories(CancellationToken cancellationToken)
     {
-        return await db.Stories.Include(s => s.Nodes.OrderBy(n => n.Order)).AsNoTracking().ToArrayAsync();
+        return await db.Stories.Include(s => s.Nodes.OrderBy(n => n.Order)).AsNoTracking().ToArrayAsync(cancellationToken);
     }
 
-    public async Task<AddResult> AddStory(AddStoryRequest addRequest)
+    public async Task<AddResult> AddStory(AddStoryRequest addRequest, CancellationToken cancellationToken)
     {
         var story = new Story();
         story.Name = addRequest.Name;
@@ -75,22 +74,22 @@ public class StoryService : IStoryService
             }
         }
 
-        await db.Stories.AddAsync(story);
+        await db.Stories.AddAsync(story, cancellationToken);
          try {
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(cancellationToken);
         } catch (DbUpdateException) {
             return AddResult.AlreadyExists;
         }
         return AddResult.Success;
     }
-    public async Task<Story> GetStory(int id)
+    public async Task<Story> GetStory(int id, CancellationToken cancellationToken)
     {
-        return await db.Stories.Include(s => s.Nodes.OrderBy(n => n.Order)).AsNoTracking().FirstOrDefaultAsync(s => s.Id == id);
+        return await db.Stories.Include(s => s.Nodes.OrderBy(n => n.Order)).AsNoTracking().FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
 
-    public async Task<UpdateResult> UpdateStory(int id, UpdateStoryRequest updateStoryRequest)
+    public async Task<UpdateResult> UpdateStory(int id, UpdateStoryRequest updateStoryRequest, CancellationToken cancellationToken)
     {
-        var story = await db.Stories.Include(s => s.Nodes.OrderBy(n => n.Order)).FirstOrDefaultAsync(s => s.Id == id);
+        var story = await db.Stories.Include(s => s.Nodes.OrderBy(n => n.Order)).FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
 
         if (story == null)
         {
@@ -131,13 +130,13 @@ public class StoryService : IStoryService
         // TODO:
         // type correct not $type
 
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(cancellationToken);
         return UpdateResult.Success;
     }
 
-    public async Task<RemoveResult> DeleteStory(int id)
+    public async Task<RemoveResult> DeleteStory(int id, CancellationToken cancellationToken)
     {
-        var story = await db.Stories.FindAsync(id);
+        var story = await db.Stories.FindAsync(id, cancellationToken);
 
         if (story == null)
         {
@@ -145,7 +144,7 @@ public class StoryService : IStoryService
         }
 
         db.Stories.Remove(story);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(cancellationToken);
         return RemoveResult.Success;
     }
 }

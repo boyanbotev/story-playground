@@ -16,7 +16,7 @@ public class StoryEngine : IStoryEngine
         this.validationService = validationService;
     }
 
-    public async Task<ProgressResponse> ProcessTurn(ProgressRequest progressRequest, Story story)
+    public async Task<ProgressResponse> ProcessTurn(ProgressRequest progressRequest, Story story, CancellationToken cancellationToken)
     {
         var node = story.Nodes[progressRequest.NodeIndex];
 
@@ -26,15 +26,15 @@ public class StoryEngine : IStoryEngine
         if (node is StoryNode)
         {
             string prompt = promptBuilder.CreateStoryPrompt(progressRequest, node as StoryNode);
-            storyText = await LLMService.Generate(prompt);
+            storyText = await LLMService.Generate(prompt, cancellationToken);
             status = GetStatus(progressRequest, storyText, story);
         }
         else
         {
             QuestNode questNode = node as QuestNode;
             string prompt = promptBuilder.CreateQuestPrompt(progressRequest, questNode);
-            storyText = await LLMService.Generate(prompt);
-            status = await GetQuestStatus(progressRequest, story, storyText, questNode);
+            storyText = await LLMService.Generate(prompt, cancellationToken);
+            status = await GetQuestStatus(progressRequest, story, storyText, questNode, cancellationToken);
         }
         status.StoryText = storyText;
 
@@ -71,22 +71,9 @@ public class StoryEngine : IStoryEngine
         }
     }
 
-    public async Task<bool> IsGoalReached(string textToCheck, string characterGoal, string storySoFar)
+    private async Task<ProgressResponse> GetQuestStatus(ProgressRequest progressRequest, Story story, string storyText, QuestNode questNode, CancellationToken cancellationToken)
     {
-        var template = promptService.Load("validate_goal_reached");
-        var prompt = promptService.Fill(template, new Dictionary<string, string>
-        {
-            { "TextToCheck", textToCheck },
-            { "CharacterGoal", characterGoal },
-            { "StorySoFar", storySoFar },
-        });
-
-        return await validationService.Validate(prompt);
-    }
-
-    private async Task<ProgressResponse> GetQuestStatus(ProgressRequest progressRequest, Story story, string storyText, QuestNode questNode)
-    {
-        bool isGoalReached = await IsGoalReached(storyText, questNode.UserGoal, progressRequest.SummarySoFar);
+        bool isGoalReached = await validationService.ValidateGoalReached(storyText, questNode.UserGoal, progressRequest.SummarySoFar, cancellationToken);
         if (isGoalReached)
         {
             var nextNodeStatus = GetNextNodeResponse(progressRequest, story);

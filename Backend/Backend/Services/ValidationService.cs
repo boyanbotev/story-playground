@@ -13,16 +13,16 @@ public class ValidationService : IValidationService
         this.promptService = promptService;
     }
 
-    public async Task<bool> ValidateUserAction(ProgressRequest progressRequest, Story story)
+    public async Task<bool> ValidateUserAction(ProgressRequest progressRequest, Story story, CancellationToken cancellationToken)
     {
-        bool isPlausible = await ValidatePlausibility(progressRequest.UserAction, story.Structure, progressRequest.SummarySoFar);
-        bool isControllingCorrectCharacter = await ValidateCharacter(progressRequest.UserAction, story.MainCharacterName);
+        bool isPlausible = await ValidatePlausibility(progressRequest.UserAction, story.Structure, progressRequest.SummarySoFar, cancellationToken);
+        bool isControllingCorrectCharacter = await ValidateCharacter(progressRequest.UserAction, story.MainCharacterName, cancellationToken);
         if (!isPlausible || !isControllingCorrectCharacter) return false;
 
         return true;
     }
 
-    private async Task<bool> ValidatePlausibility(string userAction, string storyStructure, string storySoFar)
+    private async Task<bool> ValidatePlausibility(string userAction, string storyStructure, string storySoFar, CancellationToken cancellationToken)
     {
         var template = promptService.Load("validate_action_plausibility");
         var prompt = promptService.Fill(template, new Dictionary<string, string>
@@ -32,10 +32,10 @@ public class ValidationService : IValidationService
             { "UserAction", userAction },
         });
 
-        return await Validate(prompt);
+        return await Validate(prompt, cancellationToken);
     }
 
-    private async Task<bool> ValidateCharacter(string userAction, string mainCharacter)
+    private async Task<bool> ValidateCharacter(string userAction, string mainCharacter, CancellationToken cancellationToken)
     {
         var template = promptService.Load("validate_action_character");
         var prompt = promptService.Fill(template, new Dictionary<string, string>
@@ -44,12 +44,25 @@ public class ValidationService : IValidationService
             { "UserAction", userAction },
         });
 
-        return await Validate(prompt);
+        return await Validate(prompt, cancellationToken);
     }
 
-    public async Task<bool> Validate(string prompt)
+    public async Task<bool> ValidateGoalReached(string textToCheck, string characterGoal, string storySoFar, CancellationToken cancellationToken)
     {
-        string isTrue = await LLMService.Generate(prompt);
+        var template = promptService.Load("validate_goal_reached");
+        var prompt = promptService.Fill(template, new Dictionary<string, string>
+        {
+            { "TextToCheck", textToCheck },
+            { "CharacterGoal", characterGoal },
+            { "StorySoFar", storySoFar },
+        });
+
+        return await Validate(prompt, cancellationToken);
+    }
+
+    public async Task<bool> Validate(string prompt, CancellationToken cancellationToken)
+    {
+        string isTrue = await LLMService.Generate(prompt, cancellationToken);
         
         var normalized = isTrue.Trim().ToUpper();
 

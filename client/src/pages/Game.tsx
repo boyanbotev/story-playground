@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useLoaderData } from 'react-router';
 import { requestProgress, type ProgressRequestProps } from '../requests/requestProgress';
 import { LoadingAnimation } from '../components/LoadingAnimation';
@@ -16,56 +16,86 @@ export const Game = () => {
     const [ isLoading, setIsLoading ] = useState<boolean>(false);
     const [ isStoryComplete, setIsStoryComplete ] = useState<boolean>(false);
     const [ error, setError ] = useState<string>("");
+    const controllerRef = useRef<AbortController | null>(null);
 
     const submitAction = async (e: React.SubmitEvent) => {
+        if (!action.trim()) return;
+
         e.preventDefault();
+
+        if (controllerRef.current) controllerRef.current.abort();
+        var controller = new AbortController();
+        controllerRef.current = controller;
         setIsLoading(true);
 
-        var currentNode = story.nodes[nodeIndex];
-        let progressRequest: ProgressRequestProps = {                 
-            storyId: story.id,
-            nodeIndex: nodeIndex,
-            userAction: action,
-            summarySoFar: runningSummary,
-        };
-        if (currentNode.$type == "story") {
-            progressRequest = {...progressRequest, transitionTurnsRemaining, contentTurnsRemaining };
-        }
-        
-        console.log("request", progressRequest);
+        try {
+            var currentNode = story.nodes[nodeIndex];
+            let progressRequest: ProgressRequestProps = {                 
+                storyId: story.id,
+                nodeIndex: nodeIndex,
+                userAction: action,
+                summarySoFar: runningSummary,
+            };
+            if (currentNode.$type == "story") {
+                progressRequest = {...progressRequest, transitionTurnsRemaining, contentTurnsRemaining };
+            }
+            
+            console.log("request", progressRequest);
 
-        var response = await requestProgress(progressRequest);
+            var response = await requestProgress(progressRequest);
 
-        if (response.error) {
-            setIsLoading(false);
-            setAction("");
-            setError(response.error);
-            return;
-        }
+            if (controller.signal.aborted) return;
 
-        if (response.completed) {
-            setIsLoading(false);
-            setAction("");
+            if (response.error) {
+                setIsLoading(false);
+                setAction("");
+                setError(response.error);
+                return;
+            }
+
+            if (response.completed) {
+                setIsLoading(false);
+                setAction("");
+                setStoryText(response.storyText);
+                setIsStoryComplete(true);
+                return;
+            }
+
+            if (response.questCompleteText) setQuestCompleteText(response.questCompleteText);
+            else setQuestCompleteText(null);
+
+            console.log("response", response);
+            
+            setRunningSummary(response.summarySoFar);
+            setTransitionTurnsRemaining(response.transitionTurnsRemaining);
+            setContentTurnsRemaining(response.contentTurnsRemaining);
             setStoryText(response.storyText);
-            setIsStoryComplete(true);
-            return;
+            setAction("");
+            setNodeIndex(response.nodeIndex);
+            setIsLoading(false);
+            setError("");
+            setGoal(response.userGoal);
+        } catch (err: any) {
+            if (err.name === "AbortError") {
+                console.log("aborted");
+                return;
+            }        
+            console.error(err);
+            setError("Something went wrong");
+        } finally {
+            if (!controller.signal.aborted) {
+                setIsLoading(false);
+            }
         }
-
-        if (response.questCompleteText) setQuestCompleteText(response.questCompleteText);
-        else setQuestCompleteText(null);
-
-        console.log("response", response);
-        
-        setRunningSummary(response.summarySoFar);
-        setTransitionTurnsRemaining(response.transitionTurnsRemaining);
-        setContentTurnsRemaining(response.contentTurnsRemaining);
-        setStoryText(response.storyText);
-        setAction("");
-        setNodeIndex(response.nodeIndex);
-        setIsLoading(false);
-        setError("");
-        setGoal(response.userGoal);
     }
+
+    useEffect(() => {
+        return () => {
+            if (controllerRef.current) {
+                controllerRef.current.abort();
+            }
+        };
+    }, []);
 
     return isLoading ? (
         <LoadingAnimation />

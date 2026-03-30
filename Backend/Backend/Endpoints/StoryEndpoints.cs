@@ -7,9 +7,9 @@ public static class StoryEndpoints
 {
     public static void MapStoryEndpoints(this WebApplication app)
     {
-        app.MapPost("/stories", async ([FromBody] AddStoryRequest addStoryRequest,  IStoryService storyService) =>
+        app.MapPost("/stories", async ([FromBody] AddStoryRequest addStoryRequest,  IStoryService storyService, CancellationToken cancellationToken) =>
         {
-            var result = await storyService.AddStory(addStoryRequest);
+            var result = await storyService.AddStory(addStoryRequest, cancellationToken);
             switch(result)
             {
                 case AddResult.Success:
@@ -23,9 +23,9 @@ public static class StoryEndpoints
             }
         });
 
-        app.MapDelete("/stories/{id}", async (int id, IStoryService storyService) =>
+        app.MapDelete("/stories/{id}", async (int id, IStoryService storyService, CancellationToken cancellationToken) =>
         {
-            var result = await storyService.DeleteStory(id);
+            var result = await storyService.DeleteStory(id, cancellationToken);
             switch(result)
             {
                 case RemoveResult.Success:
@@ -37,21 +37,21 @@ public static class StoryEndpoints
             }
         });
 
-        app.MapGet("/stories/{id}", async (int id, IStoryService storyService) =>
+        app.MapGet("/stories/{id}", async (int id, IStoryService storyService, CancellationToken cancellationToken) =>
         {
-            var story = await storyService.GetStory(id);
+            var story = await storyService.GetStory(id, cancellationToken);
             return Results.Ok(story);
         });
 
-        app.MapGet("stories", async (IStoryService storyService) =>
+        app.MapGet("stories", async (IStoryService storyService, CancellationToken cancellationToken) =>
         {
-            var stories = await storyService.GetStories();
+            var stories = await storyService.GetStories(cancellationToken);
             return Results.Ok(stories);
         });
 
-        app.MapPut("/stories/{id}", async (int id, [FromBody] UpdateStoryRequest updateStoryRequest, IStoryService storyService) =>
+        app.MapPut("/stories/{id}", async (int id, [FromBody] UpdateStoryRequest updateStoryRequest, IStoryService storyService, CancellationToken cancellationToken) =>
         {
-            var result = await storyService.UpdateStory(id, updateStoryRequest);
+            var result = await storyService.UpdateStory(id, updateStoryRequest, cancellationToken);
             switch(result)
             {
                 case UpdateResult.Success:
@@ -63,9 +63,9 @@ public static class StoryEndpoints
             }
         });
 
-        app.MapPost("/progress", async (ILLMService lLMService, IGameService gameService, [FromBody] ProgressRequest progressRequest, Settings settings) =>
+        app.MapPost("/progress", async (ILLMService lLMService, IGameService gameService, [FromBody] ProgressRequest progressRequest, Settings settings, CancellationToken cancellationToken) =>
         {
-            return await gameService.ProgressStory(progressRequest);
+            return await gameService.ProgressStory(progressRequest, cancellationToken);
         });
     }
 }

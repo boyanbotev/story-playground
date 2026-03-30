@@ -10,7 +10,7 @@ public class OllamaService : ILLMService
         _client = client;
     }
 
-    public async Task<string> Generate(string prompt)
+    public async Task<string> Generate(string prompt, CancellationToken cancellationToken)
     {
         var request = new
         {
@@ -21,8 +21,8 @@ public class OllamaService : ILLMService
 
         var json = System.Text.Json.JsonSerializer.Serialize(request);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await _client.PostAsync("http://localhost:11434/api/generate", content);
-        var result = await response.Content.ReadAsStringAsync();
+        var response = await _client.PostAsync("http://localhost:11434/api/generate", content, cancellationToken);
+        var result = await response.Content.ReadAsStringAsync(cancellationToken);
 
         dynamic obj = JsonConvert.DeserializeObject(result);
         string text = obj.response;

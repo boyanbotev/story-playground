@@ -18,17 +18,17 @@ public class GameService : IGameService
         this.storyEngine = storyEngine;
     }
 
-    public async Task<object> ProgressStory(ProgressRequest progressRequest)
+    public async Task<object> ProgressStory(ProgressRequest progressRequest, CancellationToken cancellationToken)
     {
-        var story = await storyService.GetStory(progressRequest.StoryId);
+        var story = await storyService.GetStory(progressRequest.StoryId, cancellationToken);
 
-        if (!await validationService.ValidateUserAction(progressRequest, story)) return RejectUserAction();
+        if (!await validationService.ValidateUserAction(progressRequest, story, cancellationToken)) return RejectUserAction();
 
-        var progressResponse = await storyEngine.ProcessTurn(progressRequest, story);
+        var progressResponse = await storyEngine.ProcessTurn(progressRequest, story, cancellationToken);
 
         progressResponse.SummarySoFar = progressResponse.Completed 
             ? progressRequest.SummarySoFar 
-            : await summaryService.GenerateSummary(progressRequest, progressResponse.StoryText);
+            : await summaryService.GenerateSummary(progressRequest, progressResponse.StoryText, cancellationToken);
 
         return progressResponse;
     }
