@@ -11,6 +11,10 @@ builder.Services.AddScoped<IPromptService, PromptService>();
 builder.Services.AddScoped<ILLMService, OllamaService>();
 builder.Services.AddScoped<IStoryService, StoryService>();
 builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<IValidationService, ValidationService>();
+builder.Services.AddScoped<ISummaryService, SummaryService>();
+builder.Services.AddScoped<IPromptBuilder, PromptBuilder>();
+builder.Services.AddScoped<IStoryEngine, StoryEngine>();
 builder.Services.Configure<JsonOptions>(options =>
 {
     options.SerializerOptions.PropertyNameCaseInsensitive = true;
