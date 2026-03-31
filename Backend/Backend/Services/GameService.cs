@@ -18,7 +18,7 @@ public class GameService : IGameService
         this.storyEngine = storyEngine;
     }
 
-    public async Task<object> ProgressStory(ProgressRequest progressRequest, CancellationToken cancellationToken)
+    public async Task<ProgressResponse> ProgressStory(ProgressRequest progressRequest, CancellationToken cancellationToken)
     {
         var story = await storyService.GetStory(progressRequest.StoryId, cancellationToken);
 
@@ -33,13 +33,10 @@ public class GameService : IGameService
         return progressResponse;
     }
 
-    private static object RejectUserAction()
+    private static ProgressResponse RejectUserAction()
     {
-        var error = "Invalid User Action";
-        var errorResponse = new
-        {
-            error,
-        };
+        var errorResponse = new ProgressResponse();
+        errorResponse.Error = "Invalid User Action";
         return errorResponse;
     }
 }

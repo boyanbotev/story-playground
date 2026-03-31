@@ -2,6 +2,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Models.DTO;
 
+
+/// <summary>
+/// Request for updating a story on the database.
+/// </summary>
 public class UpdateStoryRequest
 {
     [Required]

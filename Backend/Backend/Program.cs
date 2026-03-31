@@ -7,6 +7,7 @@ using Backend.Middlewares;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 builder.Logging.AddConsole();
 builder.Services.AddScoped<IPromptService, PromptService>();
@@ -38,6 +39,13 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
+
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "v1");
+    });
 }
 
 //app.UseHttpsRedirection();

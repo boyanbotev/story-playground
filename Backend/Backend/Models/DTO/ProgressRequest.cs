@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Models.DTO;
 
+/// <summary>
+/// Request for getting a turn's progress according to the user's action and story state.
+/// </summary>
 public class ProgressRequest
 {
     [Required]

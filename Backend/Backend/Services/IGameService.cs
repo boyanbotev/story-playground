@@ -2,5 +2,5 @@ using Backend.Models.DTO;
 
 public interface IGameService
 {
-    Task<object> ProgressStory(ProgressRequest progressRequest, CancellationToken cancellationToken);
+    Task<ProgressResponse> ProgressStory(ProgressRequest progressRequest, CancellationToken cancellationToken);
 }

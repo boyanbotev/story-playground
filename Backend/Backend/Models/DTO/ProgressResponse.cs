@@ -1,3 +1,6 @@
+/// <summary>
+/// Response for getting a turn's progress according to the user's action and story state.
+/// </summary>
 public class ProgressResponse
 {
     public string SummarySoFar { get; set; }
@@ -9,4 +12,5 @@ public class ProgressResponse
     public string QuestCompleteText { get; set; }
     public string StoryText { get; set; }
     public bool Completed { get; set; }
+    public string? Error { get; set; }
 }
