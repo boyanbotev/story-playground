@@ -7,6 +7,7 @@ using System.Net;
 using Backend.Models.Db;
 using Backend.Models.DTO;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Backend.Tests;
 
@@ -33,8 +34,10 @@ public class TasksControllerIntegrationTests : IClassFixture<WebApplicationFacto
                     services.Remove(descriptor);
                 }
 
-                services.AddDbContext<StoryContext>(options =>
-                    options.UseSqlite(dbConnectionString));
+                services.AddDbContext<StoryContext>(optionsBuilder => 
+                    optionsBuilder.UseSqlite(dbConnectionString).UseLoggerFactory(LoggerFactory.Create(builder => builder.ClearProviders()))
+                );
+                    
             });
         });
 
@@ -68,7 +71,7 @@ public class TasksControllerIntegrationTests : IClassFixture<WebApplicationFacto
 
         var addRequest = new AddStoryRequest
         {
-            Name = "Test Story",
+            Name = "Test Story 1",
             StartingSummary = "Test Starting Summary",
             Structure = "Test Structure",
             Introduction = "Test Introduction",
@@ -82,13 +85,168 @@ public class TasksControllerIntegrationTests : IClassFixture<WebApplicationFacto
 
         response.EnsureSuccessStatusCode();
 
-        var tasksResponse = await client.GetAsync("/stories");
-        tasksResponse.EnsureSuccessStatusCode();
-        var tasks = await tasksResponse.Content.ReadFromJsonAsync<List<Story>>();
-        Assert.NotNull(tasks);
-        Assert.Single(tasks);
+        var storiesResponse = await client.GetAsync("/stories");
+        storiesResponse.EnsureSuccessStatusCode();
+        var stories = await storiesResponse.Content.ReadFromJsonAsync<List<Story>>();
+        Assert.NotNull(stories);
+        Assert.Single(stories);
     }
 
+    [Fact]
+    public async Task ShouldDeleteStory()
+    {
+        var client = _factory.CreateClient();
+
+        var addRequest = new AddStoryRequest
+        {
+            Name = "Test Story 2",
+            StartingSummary = "Test Starting Summary",
+            Structure = "Test Structure",
+            Introduction = "Test Introduction",
+            MainCharacterName = "Test Main Character Name",
+            Nodes = new List<NodeRequest>{},
+        };
+
+        var content = new StringContent(JsonSerializer.Serialize(addRequest), Encoding.UTF8, "application/json");
+
+        var response = await client.PostAsync("/stories", content);
+
+        response.EnsureSuccessStatusCode();
+
+        var storiesResponse = await client.GetAsync("/stories");
+        storiesResponse.EnsureSuccessStatusCode();
+        var stories = await storiesResponse.Content.ReadFromJsonAsync<List<Story>>();
+        Assert.NotNull(stories);
+        Assert.Single(stories);
+
+        var existingStoryId = stories.Find(s => s.Name == addRequest.Name).Id;
+        Console.WriteLine($"Existing Story Id: {existingStoryId}");
+
+        var deleteResponse = await client.DeleteAsync($"/stories/{existingStoryId}");
+        deleteResponse.EnsureSuccessStatusCode();
+
+        var storiesResponseAfterDelete = await client.GetAsync("/stories");
+        storiesResponseAfterDelete.EnsureSuccessStatusCode();
+        var storiesAfterDelete = await storiesResponseAfterDelete.Content.ReadFromJsonAsync<List<Story>>();
+
+        var storyAfterDelete = storiesAfterDelete.Find(s => s.Id == existingStoryId);
+        Assert.Null(storyAfterDelete);
+    }
+
+    [Fact]
+    public async Task ShouldUpdateStory()
+    {
+        var client = _factory.CreateClient();
+
+        var addRequest = new AddStoryRequest
+        {
+            Name = "Test Story 3",
+            StartingSummary = "Test Starting Summary",
+            Structure = "Test Structure",
+            Introduction = "Test Introduction",
+            MainCharacterName = "Test Main Character Name",
+            Nodes = new List<NodeRequest>{},
+        };
+
+        var content = new StringContent(JsonSerializer.Serialize(addRequest), Encoding.UTF8, "application/json");
+
+        var response = await client.PostAsync("/stories", content);
+
+        response.EnsureSuccessStatusCode();
+
+        var storiesResponse = await client.GetAsync("/stories");
+        var stories = await storiesResponse.Content.ReadFromJsonAsync<List<Story>>();
+        var existingStoryId = stories.Find(s => s.Name == addRequest.Name).Id;
+
+        var updateRequest = new UpdateStoryRequest
+        {
+            Name = "Test Story 3 Updated",
+            StartingSummary = "Test Starting Summary",
+            Structure = "Test Structure",
+            Introduction = "Test Introduction",
+            MainCharacterName = "Test Main Character Name",
+            Nodes = new List<NodeRequest>{},
+        };
+        var content2 = new StringContent(JsonSerializer.Serialize(updateRequest), Encoding.UTF8, "application/json");
+        var updateResponse = await client.PutAsync($"/stories/{existingStoryId}", content2);
+        updateResponse.EnsureSuccessStatusCode();
+        var updatedStoriesResponse = await client.GetAsync("/stories");
+        updatedStoriesResponse.EnsureSuccessStatusCode();
+        var updatedStories = await updatedStoriesResponse.Content.ReadFromJsonAsync<List<Story>>();
+        Assert.NotNull(updatedStories);
+        Assert.Equal(updateRequest.Name, updatedStories.Find(s => s.Id == existingStoryId).Name);
+    }
+
+    [Fact]
+    public async Task ShouldGetStory()
+    {
+        var client = _factory.CreateClient();
+        var addRequest = new AddStoryRequest
+        {
+            Name = "Test Story 4",
+            StartingSummary = "Test Starting Summary",
+            Structure = "Test Structure",
+            Introduction = "Test Introduction",
+            MainCharacterName = "Test Main Character Name",
+            Nodes = new List<NodeRequest>{},
+        };
+        var content = new StringContent(JsonSerializer.Serialize(addRequest), Encoding.UTF8, "application/json");
+        var response = await client.PostAsync("/stories", content);
+        response.EnsureSuccessStatusCode();
+        var storiesResponse = await client.GetAsync("/stories");
+        var stories = await storiesResponse.Content.ReadFromJsonAsync<List<Story>>();
+        Assert.NotNull(stories);
+        Assert.Single(stories);
+        var existingStoryId = stories.Find(s => s.Name == addRequest.Name).Id;
+        var getResponse = await client.GetAsync($"/stories/{existingStoryId}");
+        getResponse.EnsureSuccessStatusCode();
+        var getStory = await getResponse.Content.ReadFromJsonAsync<Story>();
+        Assert.NotNull(getStory);
+        Assert.Equal(addRequest.Name, getStory.Name);
+    }
+
+    [Fact]
+    public async Task ShouldGetStoryWithNodes()
+    {
+        var client = _factory.CreateClient();
+        var addRequest = new AddStoryRequest
+        {
+            Name = "Test Story 5",
+            StartingSummary = "Test Starting Summary",
+            Structure = "Test Structure",
+            Introduction = "Test Introduction",
+            MainCharacterName = "Test Main Character Name",
+            Nodes = new List<NodeRequest>
+            {
+                new StoryNodeRequest
+                {
+                    Content = "Test Node 1 Content",
+                    ContentTurns = 1,
+                    TransitionTurns = 1,
+                },
+                new QuestNodeRequest
+                {
+                    UserGoal = "Test User Goal",
+                    Difficulty = "Test Difficulty",
+                },
+            },
+        };
+        var content = new StringContent(JsonSerializer.Serialize(addRequest), Encoding.UTF8, "application/json");
+        var response = await client.PostAsync("/stories", content);
+        response.EnsureSuccessStatusCode();
+        var storiesResponse = await client.GetAsync("/stories");
+        var stories = await storiesResponse.Content.ReadFromJsonAsync<List<Story>>();
+        Assert.NotNull(stories);
+        Assert.Single(stories);
+        var existingStoryId = stories.Find(s => s.Name == addRequest.Name).Id;
+        var getResponse = await client.GetAsync($"/stories/{existingStoryId}");
+        getResponse.EnsureSuccessStatusCode();
+        var getStory = await getResponse.Content.ReadFromJsonAsync<Story>();
+        Assert.NotNull(getStory);
+        Assert.Equal(addRequest.Name, getStory.Name);
+        Assert.Equal((addRequest.Nodes.First() as StoryNodeRequest).Content, (getStory.Nodes.OrderBy(n => n.Order).First() as StoryNode).Content);
+        Assert.Equal((addRequest.Nodes.Last() as QuestNodeRequest).UserGoal, (getStory.Nodes.OrderBy(n => n.Order).Last() as QuestNode).UserGoal);
+    }
 
     public void Dispose()
     {
