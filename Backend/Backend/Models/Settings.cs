@@ -8,4 +8,5 @@ public class Settings
     public string SummaryUnnecessaryPhrase { get; set; }
     public string LlmBaseUrl { get; set; }
     public string LlmModel { get; set; }
+    public string BearerKey { get; set; }
 }

@@ -18,9 +18,9 @@ public class GameService : IGameService
         this.storyEngine = storyEngine;
     }
 
-    public async Task<ProgressResponse> ProgressStory(ProgressRequest progressRequest, CancellationToken cancellationToken)
+    public async Task<ProgressResponse> ProgressStory(ProgressRequest progressRequest, string userId, CancellationToken cancellationToken)
     {
-        var story = await storyService.GetStory(progressRequest.StoryId, cancellationToken);
+        var story = await storyService.GetStory(progressRequest.StoryId, userId, cancellationToken);
 
         if (!await validationService.ValidateUserAction(progressRequest, story, cancellationToken)) return RejectUserAction();
 

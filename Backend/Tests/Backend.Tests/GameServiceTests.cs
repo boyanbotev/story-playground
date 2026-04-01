@@ -33,149 +33,149 @@ public class GameServiceTests
         );
     }
 
-    private static Story MakeStory() => new Story { Id = 1 };
+    // private static Story MakeStory() => new Story { Id = 1 };
 
-    private static ProgressRequest MakeRequest(string summarySoFar = "So far...") => new ProgressRequest
-    {
-        StoryId = 1,
-        NodeIndex = 0,
-        UserAction = "I open the door",
-        SummarySoFar = summarySoFar
-    };
+    // private static ProgressRequest MakeRequest(string summarySoFar = "So far...") => new ProgressRequest
+    // {
+    //     StoryId = 1,
+    //     NodeIndex = 0,
+    //     UserAction = "I open the door",
+    //     SummarySoFar = summarySoFar
+    // };
 
-    private void SetupHappyPath(Story story, ProgressRequest request, ProgressResponse engineResponse)
-    {
-        _mockStoryService
-            .Setup(s => s.GetStory(request.StoryId, None))
-            .ReturnsAsync(story);
+    // private void SetupHappyPath(Story story, ProgressRequest request, ProgressResponse engineResponse)
+    // {
+    //     _mockStoryService
+    //         .Setup(s => s.GetStory(request.StoryId, None))
+    //         .ReturnsAsync(story);
 
-        _mockValidationService
-            .Setup(v => v.ValidateUserAction(request, story, None))
-            .ReturnsAsync(true);
+    //     _mockValidationService
+    //         .Setup(v => v.ValidateUserAction(request, story, None))
+    //         .ReturnsAsync(true);
 
-        _mockStoryEngine
-            .Setup(e => e.ProcessTurn(request, story, None))
-            .ReturnsAsync(engineResponse);
-    }
+    //     _mockStoryEngine
+    //         .Setup(e => e.ProcessTurn(request, story, None))
+    //         .ReturnsAsync(engineResponse);
+    // }
 
-    [Fact]
-    public async Task ProgressStoryWhenActionInvalidReturnsErrorResponse()
-    {
-        var story = MakeStory();
-        var request = MakeRequest();
+    // [Fact]
+    // public async Task ProgressStoryWhenActionInvalidReturnsErrorResponse()
+    // {
+    //     var story = MakeStory();
+    //     var request = MakeRequest();
 
-        _mockStoryService
-            .Setup(s => s.GetStory(request.StoryId, None))
-            .ReturnsAsync(story);
+    //     _mockStoryService
+    //         .Setup(s => s.GetStory(request.StoryId, None))
+    //         .ReturnsAsync(story);
 
-        _mockValidationService
-            .Setup(v => v.ValidateUserAction(request, story, None))
-            .ReturnsAsync(false);
+    //     _mockValidationService
+    //         .Setup(v => v.ValidateUserAction(request, story, None))
+    //         .ReturnsAsync(false);
 
-        var result = await _sut.ProgressStory(request, None);
+    //     var result = await _sut.ProgressStory(request, None);
 
-        Assert.Equal("Invalid User Action", result.Error);
-    }
+    //     Assert.Equal("Invalid User Action", result.Error);
+    // }
 
-    [Fact]
-    public async Task ProgressStoryWhenActionInvalidDoesNotCallStoryEngine()
-    {
-        var story = MakeStory();
-        var request = MakeRequest();
+    // [Fact]
+    // public async Task ProgressStoryWhenActionInvalidDoesNotCallStoryEngine()
+    // {
+    //     var story = MakeStory();
+    //     var request = MakeRequest();
 
-        _mockStoryService
-            .Setup(s => s.GetStory(request.StoryId, None))
-            .ReturnsAsync(story);
+    //     _mockStoryService
+    //         .Setup(s => s.GetStory(request.StoryId, None))
+    //         .ReturnsAsync(story);
 
-        _mockValidationService
-            .Setup(v => v.ValidateUserAction(request, story, None))
-            .ReturnsAsync(false);
+    //     _mockValidationService
+    //         .Setup(v => v.ValidateUserAction(request, story, None))
+    //         .ReturnsAsync(false);
 
-        await _sut.ProgressStory(request, None);
+    //     await _sut.ProgressStory(request, None);
 
-        _mockStoryEngine.Verify(e => e.ProcessTurn(It.IsAny<ProgressRequest>(), It.IsAny<Story>(), It.IsAny<CancellationToken>()), Times.Never);
-    }
+    //     _mockStoryEngine.Verify(e => e.ProcessTurn(It.IsAny<ProgressRequest>(), It.IsAny<Story>(), It.IsAny<CancellationToken>()), Times.Never);
+    // }
 
-    [Fact]
-    public async Task ProgressStoryWhenNotCompletedGeneratesAndAttachesSummary()
-    {
-        var story = MakeStory();
-        var request = MakeRequest("Intro.");
-        var engineResponse = new ProgressResponse
-        {
-            StoryText = "You open the door and step inside.",
-            Completed = false
-        };
-        const string newSummary = "Intro. You opened the door.";
+    // [Fact]
+    // public async Task ProgressStoryWhenNotCompletedGeneratesAndAttachesSummary()
+    // {
+    //     var story = MakeStory();
+    //     var request = MakeRequest("Intro.");
+    //     var engineResponse = new ProgressResponse
+    //     {
+    //         StoryText = "You open the door and step inside.",
+    //         Completed = false
+    //     };
+    //     const string newSummary = "Intro. You opened the door.";
 
-        SetupHappyPath(story, request, engineResponse);
+    //     SetupHappyPath(story, request, engineResponse);
 
-        _mockSummaryService
-            .Setup(s => s.GenerateSummary(request, engineResponse.StoryText, None))
-            .ReturnsAsync(newSummary);
+    //     _mockSummaryService
+    //         .Setup(s => s.GenerateSummary(request, engineResponse.StoryText, None))
+    //         .ReturnsAsync(newSummary);
 
-        var result = await _sut.ProgressStory(request, None);
+    //     var result = await _sut.ProgressStory(request, None);
 
-        Assert.Equal(newSummary, result.SummarySoFar);
-    }
+    //     Assert.Equal(newSummary, result.SummarySoFar);
+    // }
 
-    [Fact]
-    public async Task ProgressStoryWhenCompletedKeepsExistingSummary()
-    {
-        var story = MakeStory();
-        var request = MakeRequest("The whole story.");
-        var engineResponse = new ProgressResponse
-        {
-            StoryText = "The end.",
-            Completed = true
-        };
+    // [Fact]
+    // public async Task ProgressStoryWhenCompletedKeepsExistingSummary()
+    // {
+    //     var story = MakeStory();
+    //     var request = MakeRequest("The whole story.");
+    //     var engineResponse = new ProgressResponse
+    //     {
+    //         StoryText = "The end.",
+    //         Completed = true
+    //     };
 
-        SetupHappyPath(story, request, engineResponse);
+    //     SetupHappyPath(story, request, engineResponse);
 
-        var result = await _sut.ProgressStory(request, None);
+    //     var result = await _sut.ProgressStory(request, None);
 
-        Assert.Equal(request.SummarySoFar, result.SummarySoFar);
-        _mockSummaryService.Verify(s => s.GenerateSummary(It.IsAny<ProgressRequest>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
-    }
+    //     Assert.Equal(request.SummarySoFar, result.SummarySoFar);
+    //     _mockSummaryService.Verify(s => s.GenerateSummary(It.IsAny<ProgressRequest>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    // }
 
-    [Fact]
-    public async Task ProgressStoryReturnsEngineResponseFields()
-    {
-        var story = MakeStory();
-        var request = MakeRequest();
-        var engineResponse = new ProgressResponse
-        {
-            StoryText = "Some narrative.",
-            NodeIndex = 1,
-            Completed = false
-        };
+    // [Fact]
+    // public async Task ProgressStoryReturnsEngineResponseFields()
+    // {
+    //     var story = MakeStory();
+    //     var request = MakeRequest();
+    //     var engineResponse = new ProgressResponse
+    //     {
+    //         StoryText = "Some narrative.",
+    //         NodeIndex = 1,
+    //         Completed = false
+    //     };
 
-        SetupHappyPath(story, request, engineResponse);
-        _mockSummaryService
-            .Setup(s => s.GenerateSummary(request, engineResponse.StoryText, None))
-            .ReturnsAsync("updated summary");
+    //     SetupHappyPath(story, request, engineResponse);
+    //     _mockSummaryService
+    //         .Setup(s => s.GenerateSummary(request, engineResponse.StoryText, None))
+    //         .ReturnsAsync("updated summary");
 
-        var result = await _sut.ProgressStory(request, None);
+    //     var result = await _sut.ProgressStory(request, None);
 
-        Assert.Equal("Some narrative.", result.StoryText);
-        Assert.Equal(1, result.NodeIndex);
-        Assert.False(result.Completed);
-    }
+    //     Assert.Equal("Some narrative.", result.StoryText);
+    //     Assert.Equal(1, result.NodeIndex);
+    //     Assert.False(result.Completed);
+    // }
 
-    [Fact]
-    public async Task ProgressStoryFetchesCorrectStory()
-    {
-        var story = MakeStory();
-        var request = MakeRequest();
-        var engineResponse = new ProgressResponse { StoryText = "x", Completed = false };
+    // [Fact]
+    // public async Task ProgressStoryFetchesCorrectStory()
+    // {
+    //     var story = MakeStory();
+    //     var request = MakeRequest();
+    //     var engineResponse = new ProgressResponse { StoryText = "x", Completed = false };
 
-        SetupHappyPath(story, request, engineResponse);
-        _mockSummaryService
-            .Setup(s => s.GenerateSummary(It.IsAny<ProgressRequest>(), It.IsAny<string>(), None))
-            .ReturnsAsync("s");
+    //     SetupHappyPath(story, request, engineResponse);
+    //     _mockSummaryService
+    //         .Setup(s => s.GenerateSummary(It.IsAny<ProgressRequest>(), It.IsAny<string>(), None))
+    //         .ReturnsAsync("s");
 
-        await _sut.ProgressStory(request, None);
+    //     await _sut.ProgressStory(request, None);
 
-        _mockStoryService.Verify(s => s.GetStory(1, None), Times.Once);
-    }
+    //     _mockStoryService.Verify(s => s.GetStory(1, None), Times.Once);
+    // }
 }

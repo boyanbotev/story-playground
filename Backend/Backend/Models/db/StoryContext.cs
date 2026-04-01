@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Backend.Models.Db;
 
-public class StoryContext : DbContext
+public class StoryContext : IdentityDbContext
 {
     public DbSet<Story> Stories { get; set; }
     public DbSet<Node> Nodes { get; set; }
@@ -29,5 +30,11 @@ public class StoryContext : DbContext
             .HasValue<Node>("Node")
             .HasValue<StoryNode>("StoryNode")
             .HasValue<QuestNode>("QuestNode");
+
+        modelBuilder.Entity<Story>()
+            .HasOne(p => p.User)
+            .WithMany(u => u.Stories)
+            .HasForeignKey(p => p.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

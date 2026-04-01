@@ -1,16 +1,47 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Backend.Models;
 using Backend.Models.DTO;
 using Backend.Services;
 using Backend.Models.Db;
+using System.Security.Claims;
 
 public static class StoryEndpoints
 {
     public static void MapStoryEndpoints(this WebApplication app)
     {
-        app.MapPost("/stories", async ([FromBody] AddStoryRequest addStoryRequest,  IStoryService storyService, CancellationToken cancellationToken) =>
+        app.MapPost("/auth/register", async ([FromBody] RegisterRequest registerRequest, IAuthService authService, CancellationToken cancellationToken) =>
         {
-            var result = await storyService.AddStory(addStoryRequest, cancellationToken);
+            var (succeeded, token, errors) = await authService.Register(registerRequest);
+            if (succeeded)
+            {
+                return Results.Ok(new { token });
+            }
+            return Results.BadRequest(errors);
+        })
+        .WithName("RegisterUser")
+        .Produces<string>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status400BadRequest);
+
+        app.MapPost("/auth/login", async ([FromBody] LoginRequest loginRequest, IAuthService authService, CancellationToken cancellationToken) =>
+        {
+            var (succeeded, token) = await authService.Login(loginRequest);
+
+            if (succeeded)
+            {
+                return Results.Ok(new { token });
+            }
+
+            return Results.Unauthorized();
+        })
+        .WithName("LoginUser")
+        .Produces<string>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status401Unauthorized);
+
+        app.MapPost("/stories", [Authorize] async ([FromBody] AddStoryRequest addStoryRequest,  IStoryService storyService,  ClaimsPrincipal user, CancellationToken cancellationToken) =>
+        {
+            var userId = user.FindFirstValue("UserId");
+            var result = await storyService.AddStory(addStoryRequest, userId, cancellationToken);
             switch(result)
             {
                 case AddResult.Success:
@@ -29,9 +60,10 @@ public static class StoryEndpoints
         .Produces(StatusCodes.Status409Conflict)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        app.MapDelete("/stories/{id}", async (int id, IStoryService storyService, CancellationToken cancellationToken) =>
+        app.MapDelete("/stories/{id}", [Authorize] async (int id, IStoryService storyService, ClaimsPrincipal user, CancellationToken cancellationToken) =>
         {
-            var result = await storyService.DeleteStory(id, cancellationToken);
+            var userId = user.FindFirstValue("UserId");
+            var result = await storyService.DeleteStory(id, userId, cancellationToken);
             switch(result)
             {
                 case RemoveResult.Success:
@@ -47,25 +79,28 @@ public static class StoryEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        app.MapGet("/stories/{id}", async (int id, IStoryService storyService, CancellationToken cancellationToken) =>
+        app.MapGet("/stories/{id}", [Authorize] async (int id, IStoryService storyService, ClaimsPrincipal user, CancellationToken cancellationToken) =>
         {
-            var story = await storyService.GetStory(id, cancellationToken);
+            var userId = user.FindFirstValue("UserId");
+            var story = await storyService.GetStory(id, userId, cancellationToken);
             return Results.Ok(story);
         })
         .WithName("GetStoryById")
         .Produces<Story>(StatusCodes.Status200OK);
 
-        app.MapGet("stories", async (IStoryService storyService, CancellationToken cancellationToken) =>
+        app.MapGet("stories", [Authorize] async (IStoryService storyService, ClaimsPrincipal user, CancellationToken cancellationToken) =>
         {
-            var stories = await storyService.GetStories(cancellationToken);
+            var userId = user.FindFirstValue("UserId");
+            var stories = await storyService.GetStories(userId, cancellationToken);
             return Results.Ok(stories);
         })
         .WithName("GetAllStories")
         .Produces<Story[]>(StatusCodes.Status200OK); 
 
-        app.MapPut("/stories/{id}", async (int id, [FromBody] UpdateStoryRequest updateStoryRequest, IStoryService storyService, CancellationToken cancellationToken) =>
+        app.MapPut("/stories/{id}", [Authorize] async (int id, [FromBody] UpdateStoryRequest updateStoryRequest, IStoryService storyService, ClaimsPrincipal user, CancellationToken cancellationToken) =>
         {
-            var result = await storyService.UpdateStory(id, updateStoryRequest, cancellationToken);
+            var userId = user.FindFirstValue("UserId");
+            var result = await storyService.UpdateStory(id, userId, updateStoryRequest, cancellationToken);
             switch(result)
             {
                 case UpdateResult.Success:
@@ -81,9 +116,10 @@ public static class StoryEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
 
-        app.MapPost("/progress", async (ILLMService lLMService, IGameService gameService, [FromBody] ProgressRequest progressRequest, Settings settings, CancellationToken cancellationToken) =>
+        app.MapPost("/progress", [Authorize] async (ILLMService lLMService, IGameService gameService, [FromBody] ProgressRequest progressRequest, Settings settings, ClaimsPrincipal user, CancellationToken cancellationToken) =>
         {
-            return await gameService.ProgressStory(progressRequest, cancellationToken);
+            var userId = user.FindFirstValue("UserId");
+            return await gameService.ProgressStory(progressRequest, userId, cancellationToken);
         });
     }
 }
