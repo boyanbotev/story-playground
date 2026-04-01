@@ -11,12 +11,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Backend.Tests;
 
-public class TasksControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
+public class StoryDbIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
 
-    public TasksControllerIntegrationTests(WebApplicationFactory<Program> factory)
+    public StoryDbIntegrationTests(WebApplicationFactory<Program> factory)
     {
         var folder = Environment.SpecialFolder.LocalApplicationData;
         var _dbPath = Path.Join(Environment.GetFolderPath(folder), $"tests_{Guid.NewGuid()}.db");
@@ -89,7 +89,7 @@ public class TasksControllerIntegrationTests : IClassFixture<WebApplicationFacto
         storiesResponse.EnsureSuccessStatusCode();
         var stories = await storiesResponse.Content.ReadFromJsonAsync<List<Story>>();
         Assert.NotNull(stories);
-        Assert.Single(stories);
+        Assert.Contains(stories, s => s.Name == addRequest.Name);
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public class TasksControllerIntegrationTests : IClassFixture<WebApplicationFacto
 
         var addRequest = new AddStoryRequest
         {
-            Name = "Test Story 2",
+            Name = $"Test Story {Guid.NewGuid()}",
             StartingSummary = "Test Starting Summary",
             Structure = "Test Structure",
             Introduction = "Test Introduction",
@@ -140,7 +140,7 @@ public class TasksControllerIntegrationTests : IClassFixture<WebApplicationFacto
 
         var addRequest = new AddStoryRequest
         {
-            Name = "Test Story 3",
+            Name = $"Test Story {Guid.NewGuid()}",
             StartingSummary = "Test Starting Summary",
             Structure = "Test Structure",
             Introduction = "Test Introduction",
@@ -160,7 +160,7 @@ public class TasksControllerIntegrationTests : IClassFixture<WebApplicationFacto
 
         var updateRequest = new UpdateStoryRequest
         {
-            Name = "Test Story 3 Updated",
+            Name = $"{addRequest.Name} Updated",
             StartingSummary = "Test Starting Summary",
             Structure = "Test Structure",
             Introduction = "Test Introduction",
@@ -183,7 +183,7 @@ public class TasksControllerIntegrationTests : IClassFixture<WebApplicationFacto
         var client = _factory.CreateClient();
         var addRequest = new AddStoryRequest
         {
-            Name = "Test Story 4",
+            Name = $"Test Story {Guid.NewGuid()}",
             StartingSummary = "Test Starting Summary",
             Structure = "Test Structure",
             Introduction = "Test Introduction",
@@ -211,7 +211,7 @@ public class TasksControllerIntegrationTests : IClassFixture<WebApplicationFacto
         var client = _factory.CreateClient();
         var addRequest = new AddStoryRequest
         {
-            Name = "Test Story 5",
+            Name = $"Test Story {Guid.NewGuid()}",
             StartingSummary = "Test Starting Summary",
             Structure = "Test Structure",
             Introduction = "Test Introduction",
