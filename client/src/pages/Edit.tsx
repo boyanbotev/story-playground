@@ -10,8 +10,13 @@ export const Edit = () => {
         <StoryForm
             initialStory={data.story}
             onSubmit={async (story) => {
-                await updateStory(data.story.id, story);
-                navigate("/stories");
+                const token = localStorage.getItem("token");
+                if (token) {
+                    await updateStory(data.story.id, token!, story);
+                    navigate("/stories");
+                } else {
+                    navigate("/login");
+                }
             }}
         />
     );

@@ -5,6 +5,8 @@ import { Stories } from './pages/Stories';
 import { Edit } from './pages/Edit';
 import { Game } from './pages/Game';
 import { Add } from './pages/Add';
+import { Login } from './pages/Login';
+import { Register } from './pages/Register';
 import { RootLayout } from './components/RootLayout';
 import { fetchStory } from './requests/fetchStory';
 import { fetchStories } from './requests/fetchStories';
@@ -24,8 +26,12 @@ function App() {
           path: "stories",
           Component: Stories,
             loader: async () => {
-            let stories = await fetchStories();
-            return { stories };
+              const token = localStorage.getItem("token");
+
+              if (token) {
+                let stories = await fetchStories(token!);
+                return { stories };
+              }
           }
         },
         {
@@ -37,8 +43,12 @@ function App() {
           Component: Edit,
           loader: async ({ params }) => {
             if (params.storyId == null) return;
-            let story = await fetchStory(parseInt(params.storyId));
-            return { story };
+
+            let token = localStorage.getItem("token");
+            if (token) {
+              let story = await fetchStory(parseInt(params.storyId), token);
+              return { story };
+            }
           }
         },
         {
@@ -46,9 +56,21 @@ function App() {
           Component: Game,
           loader: async ({ params }) => {
             if (params.storyId == null) return;
-            let story = await fetchStory(parseInt(params.storyId));
-            return { story };
+            let token = localStorage.getItem("token");
+
+            if (token) {
+              let story = await fetchStory(parseInt(params.storyId), token);
+              return { story };
+            }
           }
+        },
+        {
+          path: "register",
+          Component: Register,
+        },
+        {
+          path: "login",
+          Component: Login,
         }
       ]
     },

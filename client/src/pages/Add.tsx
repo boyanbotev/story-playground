@@ -9,8 +9,13 @@ export const Add = () => {
         <StoryForm
             initialStory={{}}
             onSubmit={async (story) => {
-                await postAddStory(story);
-                navigate("/stories");
+                const token = localStorage.getItem("token");
+                if (token) {
+                    await postAddStory(story, token!);
+                    navigate("/stories");
+                } else {
+                    navigate("/login");
+                }
             }}
         />
     );

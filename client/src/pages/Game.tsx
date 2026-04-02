@@ -42,7 +42,8 @@ export const Game = () => {
             
             console.log("request", progressRequest);
 
-            var response = await requestProgress(progressRequest);
+            const token = localStorage.getItem("token");
+            var response = await requestProgress(progressRequest, token!);
 
             if (controller.signal.aborted) return;
 

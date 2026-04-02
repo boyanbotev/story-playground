@@ -7,12 +7,13 @@ export type ProgressRequestProps = {
     contentTurnsRemaining?: number;
 }
 
-export const requestProgress = async (props: ProgressRequestProps, signal?: AbortSignal) => {
+export const requestProgress = async (props: ProgressRequestProps, token: string, signal?: AbortSignal) => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
     const response = await fetch(`${baseUrl}/progress`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
             ...props,
