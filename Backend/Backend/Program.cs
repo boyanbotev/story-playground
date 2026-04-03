@@ -60,8 +60,7 @@ var dbPath = Path.Join(path, "stories.db");
 builder.Services.AddDbContext<StoryContext>(options =>
     options.UseSqlite($"Data Source={dbPath}"));
 
-builder.Services.AddIdentityCore<User>(options => 
-    options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddIdentityCore<User>()
     .AddEntityFrameworkStores<StoryContext>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

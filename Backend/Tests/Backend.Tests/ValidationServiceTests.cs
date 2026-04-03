@@ -2,11 +2,13 @@ using Backend.Models.Db;
 using Backend.Models.DTO;
 using Moq;
 using Backend.Services;
+using Microsoft.Extensions.Logging;
 
 public class ValidationServiceTests
 {
     private readonly Mock<ILLMService> _mockLlmService;
     private readonly Mock<IPromptService> _mockPromptService;
+    private readonly Mock<ILogger<ValidationService>> _mockLogger;
     private readonly ValidationService _sut;
 
     private static readonly CancellationToken None = CancellationToken.None;
@@ -15,8 +17,9 @@ public class ValidationServiceTests
     {
         _mockLlmService = new Mock<ILLMService>();
         _mockPromptService = new Mock<IPromptService>();
+        _mockLogger = new Mock<ILogger<ValidationService>>();
 
-        _sut = new ValidationService(_mockLlmService.Object, _mockPromptService.Object);
+        _sut = new ValidationService(_mockLlmService.Object, _mockPromptService.Object, _mockLogger.Object);
     }
 
     private void SetupPrompt(string templateName, string returnedPrompt = "prompt")

@@ -8,7 +8,6 @@ namespace Backend.Services;
 public enum AddResult
 {
     Success,
-    AlreadyExists,
     Invalid
 }
 
@@ -26,12 +25,12 @@ public enum UpdateResult
 
 public class StoryService : IStoryService
 {
-    public StoryContext db { get; }
-    public ILLMService LLMService { get; }
-    public StoryService(StoryContext storyContext, ILLMService lLMService)
+    private readonly StoryContext db;
+    private ILogger<StoryService> logger;
+    public StoryService(StoryContext storyContext, ILogger<StoryService> logger)
     {
         db = storyContext;
-        LLMService = lLMService;
+        this.logger = logger;
     }
 
     public async Task<Story[]> GetStories(string userId, CancellationToken cancellationToken)
@@ -77,14 +76,17 @@ public class StoryService : IStoryService
                         Order = order++,
                     });
                     break;
+                default:
+                    throw new ArgumentException("Invalid node type");
             }
         }
 
         await db.Stories.AddAsync(story, cancellationToken);
          try {
             await db.SaveChangesAsync(cancellationToken);
-        } catch (DbUpdateException) {
-            return AddResult.AlreadyExists;
+        } catch (DbUpdateException e) {
+            logger.LogError(e.Message);
+            return AddResult.Invalid;
         }
         return AddResult.Success;
     }

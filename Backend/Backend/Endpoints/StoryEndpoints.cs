@@ -46,8 +46,6 @@ public static class StoryEndpoints
             {
                 case AddResult.Success:
                     return Results.Created();
-                case AddResult.AlreadyExists:
-                    return Results.Conflict();
                 case AddResult.Invalid:
                     return Results.BadRequest();
                 default:
@@ -83,6 +81,7 @@ public static class StoryEndpoints
         {
             var userId = user.FindFirstValue("UserId");
             var story = await storyService.GetStory(id, userId, cancellationToken);
+            if (story == null) return Results.NotFound();
             return Results.Ok(story);
         })
         .WithName("GetStoryById")

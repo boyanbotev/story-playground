@@ -7,10 +7,12 @@ public class ValidationService : IValidationService
 {
     public ILLMService LLMService { get; }
     private IPromptService promptService;
-    public ValidationService(ILLMService lLMService, IPromptService promptService)
+    private ILogger<ValidationService> logger;
+    public ValidationService(ILLMService lLMService, IPromptService promptService, ILogger<ValidationService> logger)
     {
         LLMService = lLMService;
         this.promptService = promptService;
+        this.logger = logger;
     }
 
     public async Task<bool> ValidateUserAction(ProgressRequest progressRequest, Story story, CancellationToken cancellationToken)
@@ -69,6 +71,7 @@ public class ValidationService : IValidationService
         if (normalized == "YES") return true;
         if (normalized == "NO") return false;
 
-        throw new Exception("Validation prompt failed to return YES or NO. Prompt: " + prompt + " Result: " + isTrue);
+        logger.LogWarning($"Invalid response from LLM: {isTrue}");
+        return false;
     }
 }
