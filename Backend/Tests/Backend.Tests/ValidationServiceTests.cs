@@ -64,19 +64,10 @@ public class ValidationServiceTests
     [InlineData("Maybe")]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ValidateThrowsWhenResponseIsNotYesOrNo(string llmResponse)
+    public async Task ValidateNegativeIsNotYesOrNo(string llmResponse)
     {
         SetupLlm(llmResponse);
-        await Assert.ThrowsAsync<Exception>(() => _sut.Validate("any prompt", None));
-    }
-
-    [Fact]
-    public async Task ValidateExceptionMessageContainsPromptAndResult()
-    {
-        SetupLlm("definitely yes");
-        var ex = await Record.ExceptionAsync(() => _sut.Validate("my prompt", None));
-        Assert.Contains("my prompt", ex.Message);
-        Assert.Contains("definitely yes", ex.Message);
+        Assert.False(await _sut.Validate("any prompt", None));
     }
 
     [Fact]
