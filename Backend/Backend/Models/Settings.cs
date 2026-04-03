@@ -9,4 +9,6 @@ public class Settings
     public string LlmBaseUrl { get; set; }
     public string LlmModel { get; set; }
     public string BearerKey { get; set; }
+    public string JwtIssuer { get; set; }
+    public string JwtAudience { get; set; }
 }
