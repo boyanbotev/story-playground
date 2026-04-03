@@ -54,7 +54,7 @@ public class StoryDbIntegrationTests : IClassFixture<WebApplicationFactory<Progr
     [Fact]
     public async Task ShouldGetEmptyListWhenNoStoriesExist()
     {
-        var client = _factory.CreateClient();
+        var client = CreateAuthenticatedClient("testuser", "Testpassword1!");
 
         var response = await client.GetAsync("/stories");
 
@@ -67,7 +67,7 @@ public class StoryDbIntegrationTests : IClassFixture<WebApplicationFactory<Progr
     [Fact]
     public async Task ShouldCreateStory()
     {
-        var client = _factory.CreateClient();
+        var client = CreateAuthenticatedClient("testuser", "Testpassword1!");
 
         var addRequest = new AddStoryRequest
         {
@@ -95,7 +95,7 @@ public class StoryDbIntegrationTests : IClassFixture<WebApplicationFactory<Progr
     [Fact]
     public async Task ShouldDeleteStory()
     {
-        var client = _factory.CreateClient();
+        var client = CreateAuthenticatedClient("testuser", "Testpassword1!");
 
         var addRequest = new AddStoryRequest
         {
@@ -136,7 +136,7 @@ public class StoryDbIntegrationTests : IClassFixture<WebApplicationFactory<Progr
     [Fact]
     public async Task ShouldUpdateStory()
     {
-        var client = _factory.CreateClient();
+        var client = CreateAuthenticatedClient("testuser", "Testpassword1!");
 
         var addRequest = new AddStoryRequest
         {
@@ -180,7 +180,7 @@ public class StoryDbIntegrationTests : IClassFixture<WebApplicationFactory<Progr
     [Fact]
     public async Task ShouldGetStory()
     {
-        var client = _factory.CreateClient();
+        var client = CreateAuthenticatedClient("testuser", "Testpassword1!");
         var addRequest = new AddStoryRequest
         {
             Name = $"Test Story {Guid.NewGuid()}",
@@ -208,7 +208,7 @@ public class StoryDbIntegrationTests : IClassFixture<WebApplicationFactory<Progr
     [Fact]
     public async Task ShouldGetStoryWithNodes()
     {
-        var client = _factory.CreateClient();
+        var client = CreateAuthenticatedClient("testuser", "Testpassword1!");
         var addRequest = new AddStoryRequest
         {
             Name = $"Test Story {Guid.NewGuid()}",
@@ -246,6 +246,80 @@ public class StoryDbIntegrationTests : IClassFixture<WebApplicationFactory<Progr
         Assert.Equal(addRequest.Name, getStory.Name);
         Assert.Equal((addRequest.Nodes.First() as StoryNodeRequest).Content, (getStory.Nodes.OrderBy(n => n.Order).First() as StoryNode).Content);
         Assert.Equal((addRequest.Nodes.Last() as QuestNodeRequest).UserGoal, (getStory.Nodes.OrderBy(n => n.Order).Last() as QuestNode).UserGoal);
+    }
+
+    [Fact]
+    public async Task ShouldNotUpdateOtherUserTasks()
+    {
+        var client = CreateAuthenticatedClient("testuser", "Testpassword1!");
+        var client2 = CreateAuthenticatedClient("testuser2", "Testpassword2!");
+
+        var addRequest = new AddStoryRequest
+        {
+            Name = $"Test Story {Guid.NewGuid()}",
+            StartingSummary = "Test Starting Summary",
+            Structure = "Test Structure",
+            Introduction = "Test Introduction",
+            MainCharacterName = "Test Main Character Name",
+            Nodes = new List<NodeRequest>{},
+        };
+
+        var content = new StringContent(JsonSerializer.Serialize(addRequest), Encoding.UTF8, "application/json");
+
+        var response = await client.PostAsync("/stories", content);
+
+        response.EnsureSuccessStatusCode();
+
+        var storiesResponse = await client.GetAsync("/stories");
+        storiesResponse.EnsureSuccessStatusCode();
+        var stories = await storiesResponse.Content.ReadFromJsonAsync<List<Story>>();
+        Assert.NotNull(stories);
+        Assert.Single(stories);
+
+        var existingStoryId = stories.Find(s => s.Name == addRequest.Name).Id;
+
+        var updateRequest = new UpdateStoryRequest
+        {
+            Name = $"{addRequest.Name} Updated",
+            StartingSummary = "Test Starting Summary",
+            Structure = "Test Structure",
+            Introduction = "Test Introduction",
+            MainCharacterName = "Test Main Character Name",
+            Nodes = new List<NodeRequest>{},
+        };
+        var content2 = new StringContent(JsonSerializer.Serialize(updateRequest), Encoding.UTF8, "application/json");
+        var updateResponse = await client2.PutAsync($"/stories/{existingStoryId}", content2);
+        Assert.Equal(HttpStatusCode.NotFound, updateResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task ShouldRejectAnonymousRequests()
+    {
+        var client = _factory.CreateClient();
+        var response = await client.GetAsync("/stories");
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    private async Task<string> GetAuthToken(string username, string password)
+    {
+        var registerRequest = new { username, password };
+        var registerContent = new StringContent(JsonSerializer.Serialize(registerRequest), Encoding.UTF8, "application/json");
+        await _client.PostAsync("/auth/register", registerContent);
+
+        var loginRequest = new { username, password };
+        var loginContent = new StringContent(JsonSerializer.Serialize(loginRequest), Encoding.UTF8, "application/json");
+        var loginResponse = await _client.PostAsync("/auth/login", loginContent);
+        loginResponse.EnsureSuccessStatusCode();
+        var loginResult = await loginResponse.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+        return loginResult["token"];
+    }
+
+    private HttpClient CreateAuthenticatedClient(string username, string password)
+    {
+        var token = GetAuthToken(username, password).Result;
+        var client = _factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        return client;
     }
 
     public void Dispose()

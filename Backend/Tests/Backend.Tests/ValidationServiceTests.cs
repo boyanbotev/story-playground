@@ -3,7 +3,6 @@ using Backend.Models.DTO;
 using Moq;
 using Backend.Services;
 
-
 public class ValidationServiceTests
 {
     private readonly Mock<ILLMService> _mockLlmService;
