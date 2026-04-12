@@ -8,9 +8,10 @@ export const StoryCard = ({ story }: { story: Story }) => {
 
     const onClickDelete = async (id: number) => {
         const isConfirmed = window.confirm("Are you sure you want to delete this story?");
+        const token = localStorage.getItem("token");
 
-        if (isConfirmed) {
-            await deleteStory(id);
+        if (isConfirmed && token) {
+            await deleteStory(id, token);
             revalidate();
         }
     }
