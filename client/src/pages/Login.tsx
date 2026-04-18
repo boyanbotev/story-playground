@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { login } from "../requests/login";
+import Box from "@mui/material/Box";
+import { FormControl, FormLabel, TextField, Button, Container, Typography, Card } from "@mui/material";
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -26,19 +28,57 @@ export const Login = () => {
   }
 
   return (
-    <div>
-      Login Page
-      <form onSubmit={handleSubmit}>
-        <label>
-          User Name:
-          <input type="text" value={userName} onChange={handleUserNameChange} />
-        </label>
-        <label>
-          Password:
-          <input type="text" value={password} onChange={handlePasswordhange} />
-        </label>
-        <input type="submit" value="Submit" />
-      </form>
-    </div>
+    <Container maxWidth="sm">
+      <Card className="sign-in-card">
+          <Typography
+            component="h1"
+            variant="h4"
+            sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
+          >
+            Sign in
+        </Typography>
+        <Box
+              component="form"
+              onSubmit={handleSubmit}
+              noValidate
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%',
+                gap: 2,
+              }}
+            >
+          <FormControl>
+            <FormLabel>
+              Username
+            </FormLabel>
+            <TextField 
+              value={userName}
+              onChange={handleUserNameChange} 
+              placeholder="Enter Username"
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>
+              Password
+            </FormLabel>
+            <TextField 
+              value={password} onChange={handlePasswordhange} 
+                placeholder="••••••"
+                type="password"
+                id="password"
+            />
+          </FormControl>
+          <Button
+            type="submit" fullWidth
+            variant="contained"
+            value="Submit"
+          >
+            Submit
+          </Button>
+        </Box>
+      </Card>
+    </Container>
   );
 }

@@ -1,6 +1,10 @@
 import { createBrowserRouter, data } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import './App.css'
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
 import { Stories } from './pages/Stories';
 import { Edit } from './pages/Edit';
 import { Game } from './pages/Game';
@@ -11,6 +15,14 @@ import { RootLayout } from './components/RootLayout';
 import { fetchStory } from './requests/fetchStory';
 import { fetchStories } from './requests/fetchStories';
 import { RootErrorBoundary } from './components/RouteErrorBoundary';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+  },
+});
 
 function App() {
 
@@ -92,9 +104,10 @@ function App() {
   ]);
 
   return (
-    <>
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
       <RouterProvider router={router} />
-    </>
+    </ThemeProvider>
   )
 }
 

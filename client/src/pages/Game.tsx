@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useLoaderData } from 'react-router';
 import { requestProgress, type ProgressRequestProps } from '../requests/requestProgress';
 import { LoadingAnimation } from '../components/LoadingAnimation';
+import { Button, FormControl, FormLabel, TextField, Box, Container } from '@mui/material';
 
 export const Game = () => {
     const { story } = useLoaderData();
@@ -108,7 +109,7 @@ export const Game = () => {
             <p><i>You have completed the story!</i></p>
         </div>
     ) : (
-        <div>
+        <Container maxWidth="sm">
             <h1>{story.name}</h1>
             {story.nodes[nodeIndex].$type == "quest" ? (
                 <div className='goal'><p>Goal: {goal}</p></div>
@@ -118,13 +119,15 @@ export const Game = () => {
             ) : null}
             <p className={"error"}>{error}</p>
             <p>{storyText}</p>
-            <form className="form" onSubmit={submitAction}>
-                <label>
-                    Write your action here:
-                    <input value={action} onChange={e => setAction(e.target.value)} />
-                </label>
-                <button type="submit">Submit</button>
-            </form>
-        </div>
+            <Box component="form" className="form" onSubmit={submitAction} noValidate sx={{ mt: 1 }}>
+                <FormControl>
+                    <FormLabel>
+                        Write your action here:
+                    </FormLabel>
+                    <TextField value={action} onChange={e => setAction(e.target.value)}/>
+                </FormControl>
+                <Button type="submit">Submit</Button>
+            </Box>
+        </Container>
     )
 }

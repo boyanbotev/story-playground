@@ -1,5 +1,6 @@
+import { Card, FormControl, FormLabel, TextField } from "@mui/material";
 import type { StoryNode } from "../dto/StoryNode";
-
+import Button from "@mui/material/Button";
 
 type Props = {
     node: StoryNode;
@@ -15,7 +16,7 @@ export const NodeEditor = ({ node, onChange, onRemove, onMoveUp, onMoveDown }: P
     };
 
     return (
-        <div className="node">
+        <Card className="node">
             <select
                 value={node.type}
                 onChange={e => update("type", e.target.value)}
@@ -26,28 +27,34 @@ export const NodeEditor = ({ node, onChange, onRemove, onMoveUp, onMoveDown }: P
 
             {node.type === "story" && (
                 <>
-                    <textarea
-                        value={node.content}
-                        placeholder="Content"
-                        onChange={e => update("content", e.target.value)}
-                    />
-                    <label>
-                        Transition Turns:
-                        <input
+                    <FormControl>
+                        <TextField
+                            multiline
+                            value={node.content}
+                            placeholder="Content"
+                            onChange={e => update("content", e.target.value)}
+                        />
+                    </FormControl>
+                    <FormControl>
+                        <FormLabel>
+                            Transition Turns:
+                        </FormLabel>
+                        <TextField
                             type="number"
                             value={node.transitionTurns ?? 0}
                             onChange={e => update("transitionTurns", e.target.value)}
                         />
-                    </label>
-
-                    <label>
-                        Content Turns:
-                        <input
+                    </FormControl>
+                    <FormControl>
+                        <FormLabel>
+                            Content Turns:
+                        </FormLabel>
+                        <TextField
                             type="number"
                             value={node.contentTurns ?? 0}
                             onChange={e => update("contentTurns", e.target.value)}
                         />
-                    </label>
+                    </FormControl>
                 </>
             )}
 
@@ -55,7 +62,7 @@ export const NodeEditor = ({ node, onChange, onRemove, onMoveUp, onMoveDown }: P
                 <>
                     <label>
                         User Goal:
-                        <input
+                        <TextField
                             value={node.userGoal ?? ""}
                             onChange={e => update("userGoal", e.target.value)}
                         />
@@ -63,7 +70,7 @@ export const NodeEditor = ({ node, onChange, onRemove, onMoveUp, onMoveDown }: P
 
                     <label>
                         Difficulty:
-                        <input
+                        <TextField
                             value={node.difficulty ?? ""}
                             onChange={e => update("difficulty", e.target.value)}
                         />
@@ -71,14 +78,14 @@ export const NodeEditor = ({ node, onChange, onRemove, onMoveUp, onMoveDown }: P
                 </>
             )}
             <div className="node-buttons">
-                <button type="button" onClick={() => onMoveUp()}>
+                <Button type="button" onClick={() => onMoveUp()}>
                     ↑
-                </button>
-                <button type="button" onClick={() => onMoveDown()}>
+                </Button>
+                <Button type="button" onClick={() => onMoveDown()}>
                     ↓
-                </button>
-                <button type="button" onClick={() => onRemove()}>Remove</button>
+                </Button>
+                <Button type="button" onClick={() => onRemove()}>Remove</Button>
             </div>
-        </div>
+        </Card>
     );
 };
