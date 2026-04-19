@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useLoaderData } from 'react-router';
 import { requestProgress, type ProgressRequestProps } from '../requests/requestProgress';
 import { LoadingAnimation } from '../components/LoadingAnimation';
-import { Button, FormControl, FormLabel, TextField, Box, Container } from '@mui/material';
+import { FormControl, FormLabel, TextField, Box, Container } from '@mui/material';
+import { StyledButton } from '../components/StyledButton';
 
 export const Game = () => {
     const { story } = useLoaderData();
@@ -126,7 +127,7 @@ export const Game = () => {
                     </FormLabel>
                     <TextField value={action} onChange={e => setAction(e.target.value)}/>
                 </FormControl>
-                <Button type="submit">Submit</Button>
+                <StyledButton type="submit">Submit</StyledButton>
             </Box>
         </Container>
     )

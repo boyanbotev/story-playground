@@ -1,6 +1,6 @@
 import { Card, FormControl, FormLabel, TextField } from "@mui/material";
 import type { StoryNode } from "../dto/StoryNode";
-import Button from "@mui/material/Button";
+import { StyledButton } from "./StyledButton";
 
 type Props = {
     node: StoryNode;
@@ -78,13 +78,13 @@ export const NodeEditor = ({ node, onChange, onRemove, onMoveUp, onMoveDown }: P
                 </>
             )}
             <div className="node-buttons">
-                <Button type="button" onClick={() => onMoveUp()}>
+                <StyledButton type="button" onClick={() => onMoveUp()}>
                     ↑
-                </Button>
-                <Button type="button" onClick={() => onMoveDown()}>
+                </StyledButton>
+                <StyledButton type="button" onClick={() => onMoveDown()}>
                     ↓
-                </Button>
-                <Button type="button" onClick={() => onRemove()}>Remove</Button>
+                </StyledButton>
+                <StyledButton type="button" onClick={() => onRemove()}>Remove</StyledButton>
             </div>
         </Card>
     );

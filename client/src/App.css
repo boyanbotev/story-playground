@@ -17,13 +17,13 @@
   border-radius: 5px;
 }
 
-.form button, .stories button {
+/* .form button, .stories button {
   margin: 0.5rem;
   padding: 0.5rem;
   border: 1px solid black;
   border-radius: 5px;
   text-transform: initial;
-}
+} */
 
 nav {
   display: flex;

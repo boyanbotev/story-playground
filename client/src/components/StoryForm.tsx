@@ -2,7 +2,8 @@ import { useState } from "react";
 import type { Story } from "../dto/Story";
 import type { StoryNode } from "../dto/StoryNode";
 import { NodeEditor } from "./NodeEditor";
-import { TextField, Button, FormControl, FormLabel, Container, Box } from "@mui/material";
+import { TextField, FormControl, FormLabel, Container, Box } from "@mui/material";
+import { StyledButton } from "./StyledButton";
 
 type StoryFormProps = {
     initialStory: Partial<Story>;
@@ -141,8 +142,8 @@ export const StoryForm = ({ initialStory, onSubmit }: StoryFormProps) => {
                     ))}
                 </div>
 
-                <Button type="button" onClick={addNode}>Add Node</Button>
-                <Button type="submit">Submit</Button>
+                <StyledButton type="button" onClick={addNode}>Add Node</StyledButton>
+                <StyledButton type="submit">Submit</StyledButton>
             </Box>
         </Container>
 

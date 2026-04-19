@@ -1,8 +1,9 @@
 import { useRevalidator } from "react-router"
 import type { Story } from "../dto/Story";
 import { deleteStory } from "../requests/deleteStory"
-import { Button, ButtonGroup, Card, Container } from "@mui/material";
+import { Card, Container } from "@mui/material";
 import { useNavigate } from "react-router";
+import { StyledButton } from "./StyledButton";
 
 export const StoryCard = ({ story }: { story: Story }) => {
 
@@ -26,9 +27,9 @@ export const StoryCard = ({ story }: { story: Story }) => {
                 <p>Synopsis: {story.structure}</p>
             </Container>
             <Container className="button-panel" aria-label="Basic button group">
-                <Button variant="contained" onClick={() => navigate(`/stories/${story.id}/play`)}>Play</Button>
-                <Button variant="contained" onClick={() => navigate(`/stories/${story.id}`)}>Edit</Button>
-                <Button variant="contained" onClick={() => onClickDelete(story.id!)}>Delete</Button>
+                <StyledButton variant="contained" onClick={() => navigate(`/stories/${story.id}/play`)}>Play</StyledButton>
+                <StyledButton variant="contained" onClick={() => navigate(`/stories/${story.id}/edit`)}>Edit</StyledButton>
+                <StyledButton variant="contained" onClick={() => onClickDelete(story.id!)}>Delete</StyledButton>
             </Container>
         </Card>
     )

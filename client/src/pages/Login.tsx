@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { login } from "../requests/login";
 import Box from "@mui/material/Box";
-import { FormControl, FormLabel, TextField, Button, Container, Typography, Card } from "@mui/material";
+import { FormControl, FormLabel, TextField, Container, Typography, Card } from "@mui/material";
+import { StyledButton } from "../components/StyledButton";
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -70,13 +71,13 @@ export const Login = () => {
                 id="password"
             />
           </FormControl>
-          <Button
+          <StyledButton
             type="submit" fullWidth
             variant="contained"
             value="Submit"
           >
             Submit
-          </Button>
+          </StyledButton>
         </Box>
       </Card>
     </Container>
