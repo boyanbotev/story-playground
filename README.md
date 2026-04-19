@@ -4,15 +4,15 @@ A RESTful Web App using ASP.NET Core in .NET 10.0, implementing node-based user 
 ## Tech Stack
 ### Backend
 - .NET 10 / ASP.NET Core Web App
-- Entity Framework Core
-- ASP.NET Core Identity
-- SQLite
-- xUnit (integration tests)
-- Olama
+- [ASP.NET Core Identity](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/identity?view=aspnetcore-10.0&tabs=visual-studio) for Authorization and Authentication
+- [SQLite](https://sqlite.org/) Database with [Entity Framework Core](https://learn.microsoft.com/en-us/ef/)
+- [xUnit](https://xunit.net/?tabs=cs) for testing
+- [Ollama](https://ollama.com/) to interface with LLMs
 ### Frontend
-- React
-- Vite.js
-- TypeScript
+- [React](https://react.dev/) for reusable components
+- [Vite.js](https://vite.dev/) as a bundler
+- [TypeScript](https://www.typescriptlang.org/) for type safety
+- [Material UI](https://mui.com/material-ui/) for styling
 
 ## Prerequisites
 
