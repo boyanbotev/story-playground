@@ -10,7 +10,7 @@ export const Home = () => {
             >
                 Story Playground
             </Typography>
-            <img src="book.png" alt="book" width="100%" className="decorative-image" />
+            <img src="book2.png" alt="book" width="100%" className="decorative-image" />
             <Typography variant="h5" sx={{ width: '100%', fontSize: 'clamp(1rem, 10vw, 1.5rem)' }}>
                 Features
             </Typography>
