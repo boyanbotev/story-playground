@@ -138,3 +138,8 @@ textarea {
   width: 500px;
   margin-top: 2rem;
 }
+
+.decorative-image {
+  width: 500px;
+  padding: 1rem;
+}

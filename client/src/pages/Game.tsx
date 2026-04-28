@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useLoaderData } from 'react-router';
 import { requestProgress, type ProgressRequestProps } from '../requests/requestProgress';
 import { LoadingAnimation } from '../components/LoadingAnimation';
-import { FormControl, FormLabel, TextField, Box, Container } from '@mui/material';
+import { FormControl, FormLabel, TextField, Box, Container, Typography } from '@mui/material';
 import { StyledButton } from '../components/StyledButton';
 
 export const Game = () => {
@@ -103,15 +103,27 @@ export const Game = () => {
     return isLoading ? (
         <LoadingAnimation />
     ) : isStoryComplete ? (
-        <div>
-            <h1>{story.name}</h1>
+        <Container maxWidth="sm">
+            <Typography
+                component="h1"
+                variant="h4"
+                sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
+            >
+                {story.name}
+            </Typography>
             <p>{storyText}</p>
             <b>THE END</b>
             <p><i>You have completed the story!</i></p>
-        </div>
+        </Container>
     ) : (
         <Container maxWidth="sm">
-            <h1>{story.name}</h1>
+            <Typography
+                component="h1"
+                variant="h4"
+                sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
+            >
+                {story.name}
+            </Typography>
             {story.nodes[nodeIndex].$type == "quest" ? (
                 <div className='goal'><p>Goal: {goal}</p></div>
             ) : null}

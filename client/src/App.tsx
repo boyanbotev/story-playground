@@ -5,6 +5,7 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+import { Home } from './pages/Home';
 import { Stories } from './pages/Stories';
 import { Edit } from './pages/Edit';
 import { Game } from './pages/Game';
@@ -33,7 +34,7 @@ function App() {
       children: [
         {
           index: true,
-          element: <h1>Story Playground</h1>,
+          Component: Home,
         },
         {
           path: "stories",
