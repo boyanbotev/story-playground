@@ -22,13 +22,20 @@ public class GameService : IGameService
     {
         var story = await storyService.GetStory(progressRequest.StoryId, userId, cancellationToken);
 
-        if (!await validationService.ValidateUserAction(progressRequest, story, cancellationToken)) return RejectUserAction();
+        var response = await validationService.ValidateUserAction(progressRequest, story, cancellationToken);
+
+        if (response.result == ValidationResult.Invalid) return RejectUserAction();
+        if (response.result == ValidationResult.Error) return RejectLLM(response.error);
 
         var progressResponse = await storyEngine.ProcessTurn(progressRequest, story, cancellationToken);
 
-        progressResponse.SummarySoFar = progressResponse.Completed 
-            ? progressRequest.SummarySoFar 
-            : await summaryService.GenerateSummary(progressRequest, progressResponse.StoryText, cancellationToken);
+        if (progressResponse.Completed) progressResponse.SummarySoFar = progressRequest.SummarySoFar;
+        else
+        {
+            var summaryResponse = await summaryService.GenerateSummary(progressRequest, progressResponse.StoryText, cancellationToken);
+            if (summaryResponse.Error != null) return RejectLLM(summaryResponse.Error);
+            progressResponse.SummarySoFar = summaryResponse.Text;
+        }
 
         return progressResponse;
     }
@@ -37,6 +44,13 @@ public class GameService : IGameService
     {
         var errorResponse = new ProgressResponse();
         errorResponse.Error = "Invalid User Action";
+        return errorResponse;
+    }
+
+    private static ProgressResponse RejectLLM(string error)
+    {
+        var errorResponse = new ProgressResponse();
+        errorResponse.Error = error;
         return errorResponse;
     }
 }

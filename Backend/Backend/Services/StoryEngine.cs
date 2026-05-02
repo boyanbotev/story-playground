@@ -24,14 +24,22 @@ public class StoryEngine : IStoryEngine
         if (node is StoryNode)
         {
             string prompt = promptBuilder.CreateStoryPrompt(progressRequest, node as StoryNode);
-            storyText = await LLMService.Generate(prompt, cancellationToken);
+            var response = await LLMService.Generate(prompt, cancellationToken);
+            storyText = response.Text;
+
+            if (response.Error != null) return LLMError(response.Error);
+
             status = GetStatus(progressRequest, storyText, story);
         }
         else
         {
             QuestNode questNode = node as QuestNode;
             string prompt = promptBuilder.CreateQuestPrompt(progressRequest, questNode);
-            storyText = await LLMService.Generate(prompt, cancellationToken);
+            var response = await LLMService.Generate(prompt, cancellationToken);
+            storyText = response.Text;
+
+            if (response.Error != null) return LLMError(response.Error);
+
             status = await GetQuestStatus(progressRequest, story, storyText, questNode, cancellationToken);
         }
         status.StoryText = storyText;
@@ -71,12 +79,16 @@ public class StoryEngine : IStoryEngine
 
     private async Task<ProgressResponse> GetQuestStatus(ProgressRequest progressRequest, Story story, string storyText, QuestNode questNode, CancellationToken cancellationToken)
     {
-        bool isGoalReached = await validationService.ValidateGoalReached(storyText, questNode.UserGoal, progressRequest.SummarySoFar, cancellationToken);
-        if (isGoalReached)
+        ValidationResponse isGoalReached = await validationService.ValidateGoalReached(storyText, questNode.UserGoal, progressRequest.SummarySoFar, cancellationToken);
+        if (isGoalReached.result.Equals(ValidationResult.Success))
         {
             var nextNodeStatus = GetNextNodeResponse(progressRequest, story);
             nextNodeStatus.QuestCompleteText = $"QUEST COMPLETE: {questNode.UserGoal}";
             return nextNodeStatus;
+        }
+        else if (isGoalReached.result.Equals(ValidationResult.Error))
+        {
+            return LLMError(isGoalReached.error);
         }
 
         var status = new ProgressResponse();
@@ -105,6 +117,13 @@ public class StoryEngine : IStoryEngine
         status.TransitionTurnsRemaining = transitionTurnsRemaining;
         status.ContentTurnsRemaining = contentTurnsRemaining;
 
+        return status;
+    }
+
+    ProgressResponse LLMError(string error)
+    {
+        var status = new ProgressResponse();
+        status.Error = error;
         return status;
     }
 }

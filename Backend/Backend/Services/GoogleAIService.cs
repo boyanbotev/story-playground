@@ -1,5 +1,6 @@
 using Backend.Models;
 using Google.GenAI;
+using Backend.Models.DTO;
 
 namespace Backend.Services;
 
@@ -13,11 +14,20 @@ public class GoogleAIService : ILLMService
         _settings = settings;
     }
 
-    public async Task<string> Generate(string prompt, CancellationToken cancellationToken)
+    public async Task<LLMResponse> Generate(string prompt, CancellationToken cancellationToken)
     {
         var client = new Client(false, _settings.ApiKey);
 
-        var response = await client.Models.GenerateContentAsync(_settings.LlmModel, prompt);
-        return response.Candidates[0].Content.Parts[0].Text;
+        try
+        {
+            var response = await client.Models.GenerateContentAsync(_settings.LlmModel, prompt);
+            string text = response.Candidates[0].Content.Parts[0].Text;
+            return new LLMResponse(text, null);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            return new LLMResponse(null, ex.Message);
+        }
     }
 }

@@ -3,6 +3,13 @@ using Backend.Models.DTO;
 
 namespace Backend.Services;
 
+public enum ValidationResult
+{
+    Success,
+    Invalid,
+    Error
+}
+
 public class ValidationService : IValidationService
 {
     public ILLMService LLMService { get; }
@@ -15,16 +22,19 @@ public class ValidationService : IValidationService
         this.logger = logger;
     }
 
-    public async Task<bool> ValidateUserAction(ProgressRequest progressRequest, Story story, CancellationToken cancellationToken)
+    public async Task<ValidationResponse> ValidateUserAction(ProgressRequest progressRequest, Story story, CancellationToken cancellationToken)
     {
-        bool isPlausible = await ValidatePlausibility(progressRequest.UserAction, story.Structure, progressRequest.SummarySoFar, cancellationToken);
-        bool isControllingCorrectCharacter = await ValidateCharacter(progressRequest.UserAction, story.MainCharacterName, cancellationToken);
-        if (!isPlausible || !isControllingCorrectCharacter) return false;
+        ValidationResponse isPlausible = await ValidatePlausibility(progressRequest.UserAction, story.Structure, progressRequest.SummarySoFar, cancellationToken);
+        ValidationResponse isControllingCorrectCharacter = await ValidateCharacter(progressRequest.UserAction, story.MainCharacterName, cancellationToken);
 
-        return true;
+        if (isPlausible.result == ValidationResult.Invalid || isControllingCorrectCharacter.result == ValidationResult.Invalid) return new ValidationResponse { result = ValidationResult.Invalid };
+        if (isPlausible.result == ValidationResult.Error) return isPlausible;
+        if (isControllingCorrectCharacter.result == ValidationResult.Error) return isControllingCorrectCharacter;
+
+        return new ValidationResponse { result = ValidationResult.Success };
     }
 
-    private async Task<bool> ValidatePlausibility(string userAction, string storyStructure, string storySoFar, CancellationToken cancellationToken)
+    private async Task<ValidationResponse> ValidatePlausibility(string userAction, string storyStructure, string storySoFar, CancellationToken cancellationToken)
     {
         var template = promptService.Load("validate_action_plausibility");
         var prompt = promptService.Fill(template, new Dictionary<string, string>
@@ -37,7 +47,7 @@ public class ValidationService : IValidationService
         return await Validate(prompt, cancellationToken);
     }
 
-    private async Task<bool> ValidateCharacter(string userAction, string mainCharacter, CancellationToken cancellationToken)
+    private async Task<ValidationResponse> ValidateCharacter(string userAction, string mainCharacter, CancellationToken cancellationToken)
     {
         var template = promptService.Load("validate_action_character");
         var prompt = promptService.Fill(template, new Dictionary<string, string>
@@ -49,7 +59,7 @@ public class ValidationService : IValidationService
         return await Validate(prompt, cancellationToken);
     }
 
-    public async Task<bool> ValidateGoalReached(string textToCheck, string characterGoal, string storySoFar, CancellationToken cancellationToken)
+    public async Task<ValidationResponse> ValidateGoalReached(string textToCheck, string characterGoal, string storySoFar, CancellationToken cancellationToken)
     {
         var template = promptService.Load("validate_goal_reached");
         var prompt = promptService.Fill(template, new Dictionary<string, string>
@@ -62,16 +72,37 @@ public class ValidationService : IValidationService
         return await Validate(prompt, cancellationToken);
     }
 
-    public async Task<bool> Validate(string prompt, CancellationToken cancellationToken)
+    public async Task<ValidationResponse> Validate(string prompt, CancellationToken cancellationToken)
     {
-        string isTrue = await LLMService.Generate(prompt, cancellationToken);
+        ValidationResponse validationResponse = new();
+        var response = await LLMService.Generate(prompt, cancellationToken);
+
+        if (response.Error != null)
+        {
+            logger.LogWarning($"Error generating LLM response");
+
+            validationResponse.result = ValidationResult.Error;
+            validationResponse.error = response.Error;
+            return validationResponse;
+        }
+
+        string isTrue = response.Text;
         
         var normalized = isTrue.Trim().ToUpper();
 
-        if (normalized == "YES") return true;
-        if (normalized == "NO") return false;
+        ValidationResult result;
+        if (normalized == "YES") result = ValidationResult.Success;
+        else if (normalized == "NO") result = ValidationResult.Invalid;
+        else
+        {
+            logger.LogWarning($"Invalid response from LLM: {isTrue}");
+            result = ValidationResult.Invalid;
+        }
 
-        logger.LogWarning($"Invalid response from LLM: {isTrue}");
-        return false;
+        return new ValidationResponse
+        {
+            result = result,
+            error = null
+        };
     }
 }

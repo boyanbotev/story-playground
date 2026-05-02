@@ -1,4 +1,6 @@
+using Backend.Models.DTO;
+
 public interface ILLMService
 {
-    Task<string> Generate(string prompt, CancellationToken cancellationToken);
+    Task<LLMResponse> Generate(string prompt, CancellationToken cancellationToken);
 }
