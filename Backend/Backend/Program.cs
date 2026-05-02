@@ -36,7 +36,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddHttpClient();
 builder.Logging.AddConsole();
 builder.Services.AddScoped<IPromptService, PromptService>();
-builder.Services.AddScoped<ILLMService, OllamaService>();
+builder.Services.AddScoped<ILLMService, GoogleAIService>();
 builder.Services.AddScoped<IStoryService, StoryService>();
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IValidationService, ValidationService>();
