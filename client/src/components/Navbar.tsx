@@ -35,7 +35,7 @@ export function Navbar() {
             <Container maxWidth="lg">
                 <StyledToolbar>
                     <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', px: 0 }}>
-                        <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+                        <Box sx={{ display: 'flex' }}>
                             <StyledButton component={NavLink} to={"/stories"}>
                                 Stories
                             </StyledButton>
