@@ -42,7 +42,7 @@ public class AuthService : IAuthService
             return (true, token, null);
         }
 
-        return (false, null,  result.Errors.Select(e => e.Description));
+        return (false, null, result.Errors.Select(e => e.Description));
     }
 
     public async Task<(bool Succeeded, string Token)> Login(LoginRequest loginRequest)

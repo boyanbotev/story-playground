@@ -17,7 +17,7 @@ public static class StoryEndpoints
             {
                 return Results.Ok(new { token });
             }
-            return Results.BadRequest(errors);
+            return Results.BadRequest(new { errors });
         })
         .WithName("RegisterUser")
         .Produces<string>(StatusCodes.Status200OK)

@@ -11,7 +11,7 @@ export const Register = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [apiKey, setApiKey] = useState("");
-  const [error, setError] = useState("");
+  const [errors, setError] = useState([""]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -25,7 +25,7 @@ export const Register = () => {
           navigate("/");
         });
       } else {
-        setError(response.error);
+        setError(response.errors);
       }
     });
   }
@@ -63,7 +63,7 @@ export const Register = () => {
             gap: 2,
           }}
         >
-          {error ? <p>{error}</p> : null}
+          {errors?.length ? errors.map(error =><p className={"error"}>{error}</p>) : null}
           <FormControl>
             <FormLabel>
               Username
