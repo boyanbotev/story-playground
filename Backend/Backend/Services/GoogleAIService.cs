@@ -14,9 +14,9 @@ public class GoogleAIService : ILLMService
         _settings = settings;
     }
 
-    public async Task<LLMResponse> Generate(string prompt, CancellationToken cancellationToken)
+    public async Task<LLMResponse> Generate(string prompt, string apiKey, CancellationToken cancellationToken)
     {
-        var client = new Client(false, _settings.ApiKey);
+        var client = new Client(false, apiKey);
 
         try
         {

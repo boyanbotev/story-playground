@@ -22,10 +22,10 @@ public class ValidationService : IValidationService
         this.logger = logger;
     }
 
-    public async Task<ValidationResponse> ValidateUserAction(ProgressRequest progressRequest, Story story, CancellationToken cancellationToken)
+    public async Task<ValidationResponse> ValidateUserAction(ProgressRequest progressRequest, Story story, string apiKey, CancellationToken cancellationToken)
     {
-        ValidationResponse isPlausible = await ValidatePlausibility(progressRequest.UserAction, story.Structure, progressRequest.SummarySoFar, cancellationToken);
-        ValidationResponse isControllingCorrectCharacter = await ValidateCharacter(progressRequest.UserAction, story.MainCharacterName, cancellationToken);
+        ValidationResponse isPlausible = await ValidatePlausibility(progressRequest.UserAction, story.Structure, progressRequest.SummarySoFar, apiKey, cancellationToken);
+        ValidationResponse isControllingCorrectCharacter = await ValidateCharacter(progressRequest.UserAction, story.MainCharacterName, apiKey, cancellationToken);
 
         if (isPlausible.result == ValidationResult.Invalid || isControllingCorrectCharacter.result == ValidationResult.Invalid) return new ValidationResponse { result = ValidationResult.Invalid };
         if (isPlausible.result == ValidationResult.Error) return isPlausible;
@@ -34,7 +34,7 @@ public class ValidationService : IValidationService
         return new ValidationResponse { result = ValidationResult.Success };
     }
 
-    private async Task<ValidationResponse> ValidatePlausibility(string userAction, string storyStructure, string storySoFar, CancellationToken cancellationToken)
+    private async Task<ValidationResponse> ValidatePlausibility(string userAction, string storyStructure, string storySoFar, string apiKey, CancellationToken cancellationToken)
     {
         var template = promptService.Load("validate_action_plausibility");
         var prompt = promptService.Fill(template, new Dictionary<string, string>
@@ -44,10 +44,10 @@ public class ValidationService : IValidationService
             { "UserAction", userAction },
         });
 
-        return await Validate(prompt, cancellationToken);
+        return await Validate(prompt, apiKey, cancellationToken);
     }
 
-    private async Task<ValidationResponse> ValidateCharacter(string userAction, string mainCharacter, CancellationToken cancellationToken)
+    private async Task<ValidationResponse> ValidateCharacter(string userAction, string mainCharacter, string apiKey, CancellationToken cancellationToken)
     {
         var template = promptService.Load("validate_action_character");
         var prompt = promptService.Fill(template, new Dictionary<string, string>
@@ -56,10 +56,10 @@ public class ValidationService : IValidationService
             { "UserAction", userAction },
         });
 
-        return await Validate(prompt, cancellationToken);
+        return await Validate(prompt, apiKey, cancellationToken);
     }
 
-    public async Task<ValidationResponse> ValidateGoalReached(string textToCheck, string characterGoal, string storySoFar, CancellationToken cancellationToken)
+    public async Task<ValidationResponse> ValidateGoalReached(string textToCheck, string characterGoal, string storySoFar, string apiKey, CancellationToken cancellationToken)
     {
         var template = promptService.Load("validate_goal_reached");
         var prompt = promptService.Fill(template, new Dictionary<string, string>
@@ -69,13 +69,13 @@ public class ValidationService : IValidationService
             { "StorySoFar", storySoFar },
         });
 
-        return await Validate(prompt, cancellationToken);
+        return await Validate(prompt, apiKey, cancellationToken);
     }
 
-    public async Task<ValidationResponse> Validate(string prompt, CancellationToken cancellationToken)
+    public async Task<ValidationResponse> Validate(string prompt, string apiKey, CancellationToken cancellationToken)
     {
         ValidationResponse validationResponse = new();
-        var response = await LLMService.Generate(prompt, cancellationToken);
+        var response = await LLMService.Generate(prompt, apiKey, cancellationToken);
 
         if (response.Error != null)
         {

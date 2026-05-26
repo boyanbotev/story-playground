@@ -15,7 +15,7 @@ public class SummaryService : ISummaryService
         this.settings = settings;
     }
 
-    public async Task<LLMResponse> GenerateSummary(ProgressRequest progressRequest, string storyText, CancellationToken cancellationToken)
+    public async Task<LLMResponse> GenerateSummary(ProgressRequest progressRequest, string storyText, string apiKey, CancellationToken cancellationToken)
     {
         var template = promptService.Load("summary");
         var prompt = promptService.Fill(template, new Dictionary<string, string>
@@ -24,7 +24,7 @@ public class SummaryService : ISummaryService
             { "SummaryUnnecessaryPhrase", settings.SummaryUnnecessaryPhrase },
         });
 
-        var response = await LLMService.Generate(prompt, cancellationToken);
+        var response = await LLMService.Generate(prompt, apiKey, cancellationToken);
         string summaryExtension = response.Text;
 
         summaryExtension = summaryExtension.Contains(settings.SummaryUnnecessaryPhrase) ? "" : summaryExtension;

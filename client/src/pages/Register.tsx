@@ -10,12 +10,13 @@ export const Register = () => {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
+  const [apiKey, setApiKey] = useState("");
   const [error, setError] = useState("");
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    register(userName, password).then((response) => {
+    register(userName, password, apiKey).then((response) => {
       const token = response.token;
       if (token) {
         login(userName, password).then((response) => {
@@ -35,6 +36,10 @@ export const Register = () => {
 
   function handlePasswordhange(event: React.ChangeEvent<HTMLInputElement>) {
     setPassword(event.target.value);
+  }
+
+  function handleApiKeyChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setApiKey(event.target.value);
   }
 
   return (
@@ -79,6 +84,17 @@ export const Register = () => {
                 placeholder="••••••"
                 type="password"
                 id="password"
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>
+              Google AI API Key
+            </FormLabel>
+            <TextField 
+              value={apiKey}
+              onChange={handleApiKeyChange} 
+              placeholder="Enter Google AI API key"
             />
           </FormControl>
           <StyledButton

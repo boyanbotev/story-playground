@@ -58,7 +58,7 @@ function App() {
           Component: Add,
         },
         {
-          path: "stories/:storyId",
+          path: "stories/:storyId/edit",
           Component: Edit,
           ErrorBoundary: RootErrorBoundary,
           loader: async ({ params }) => {

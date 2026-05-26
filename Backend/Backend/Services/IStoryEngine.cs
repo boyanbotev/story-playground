@@ -3,5 +3,5 @@ using Backend.Models.DTO;
 
 public interface IStoryEngine
 {
-    Task<ProgressResponse> ProcessTurn(ProgressRequest progressRequest, Story story, CancellationToken cancellationToken);
+    Task<ProgressResponse> ProcessTurn(ProgressRequest progressRequest, Story story, string apiKey, CancellationToken cancellationToken);
 }

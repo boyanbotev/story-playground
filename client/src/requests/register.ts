@@ -1,4 +1,4 @@
-export const register = async (username: string, password: string, signal?: AbortSignal) => {
+export const register = async (username: string, password: string, apiKey: string, signal?: AbortSignal) => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
     const response = await fetch(`${baseUrl}/auth/register`, {
         method: 'POST',
@@ -8,6 +8,7 @@ export const register = async (username: string, password: string, signal?: Abor
         body: JSON.stringify({
             userName: username,
             password: password,
+            apiKey: apiKey,
         }),
         signal,
     });

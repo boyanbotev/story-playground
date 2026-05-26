@@ -27,6 +27,7 @@ public class AuthService : IAuthService
         var user = new User
         {
             UserName = registerRequest.Username,
+            ApiKey = registerRequest.ApiKey
         };
 
         var result = await userManager.CreateAsync(user, registerRequest.Password);
@@ -37,7 +38,7 @@ public class AuthService : IAuthService
         }
         if (result.Succeeded)
         {
-            var token = GenerateJwtToken(user.UserName, user.Id);
+            var token = GenerateJwtToken(user.UserName, user.Id, user.ApiKey);
             return (true, token, null);
         }
 
@@ -50,18 +51,19 @@ public class AuthService : IAuthService
 
         if (user != null && await userManager.CheckPasswordAsync(user, loginRequest.Password))
         {
-            var token = GenerateJwtToken(user.UserName, user.Id);
+            var token = GenerateJwtToken(user.UserName, user.Id, user.ApiKey);
             return (true, token);
         }
         return (false, null);
     }
 
-    private string GenerateJwtToken(string username, string userId)
+    private string GenerateJwtToken(string username, string userId, string apiKey)
     {
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, username),
             new Claim("UserId", userId),
+            new Claim("ApiKey", apiKey),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 

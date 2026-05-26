@@ -18,21 +18,21 @@ public class GameService : IGameService
         this.storyEngine = storyEngine;
     }
 
-    public async Task<ProgressResponse> ProgressStory(ProgressRequest progressRequest, string userId, CancellationToken cancellationToken)
+    public async Task<ProgressResponse> ProgressStory(ProgressRequest progressRequest, string userId, string apiKey, CancellationToken cancellationToken)
     {
         var story = await storyService.GetStory(progressRequest.StoryId, userId, cancellationToken);
 
-        var response = await validationService.ValidateUserAction(progressRequest, story, cancellationToken);
+        var response = await validationService.ValidateUserAction(progressRequest, story, apiKey, cancellationToken);
 
         if (response.result == ValidationResult.Invalid) return RejectUserAction();
         if (response.result == ValidationResult.Error) return RejectLLM(response.error);
 
-        var progressResponse = await storyEngine.ProcessTurn(progressRequest, story, cancellationToken);
+        var progressResponse = await storyEngine.ProcessTurn(progressRequest, story, apiKey, cancellationToken);
 
         if (progressResponse.Completed) progressResponse.SummarySoFar = progressRequest.SummarySoFar;
         else
         {
-            var summaryResponse = await summaryService.GenerateSummary(progressRequest, progressResponse.StoryText, cancellationToken);
+            var summaryResponse = await summaryService.GenerateSummary(progressRequest, progressResponse.StoryText, apiKey, cancellationToken);
             if (summaryResponse.Error != null) return RejectLLM(summaryResponse.Error);
             progressResponse.SummarySoFar = summaryResponse.Text;
         }
