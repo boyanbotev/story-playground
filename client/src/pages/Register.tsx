@@ -63,7 +63,7 @@ export const Register = () => {
             gap: 2,
           }}
         >
-          {errors?.length ? errors.map(error =><p className={"error"}>{error}</p>) : null}
+          {errors?.length ? errors.map((error, index) => <p key={index} className={"error"}>{error}</p>) : null}
           <FormControl>
             <FormLabel>
               Username
