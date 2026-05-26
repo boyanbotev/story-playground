@@ -11,7 +11,7 @@ export const Register = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [apiKey, setApiKey] = useState("");
-  const [errors, setError] = useState([""]);
+  const [errors, setErrors] = useState([""]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -25,7 +25,7 @@ export const Register = () => {
           navigate("/");
         });
       } else {
-        setError(response.errors);
+        setErrors(response.errors);
       }
     });
   }

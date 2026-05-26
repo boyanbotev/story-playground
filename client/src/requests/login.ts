@@ -11,5 +11,6 @@ export const login = async (username: string, password: string, signal?: AbortSi
         }),
         signal,
     });
+    if (!response.ok) return { error: "Invalid username or password" };
     return await response.json();
 }

@@ -9,14 +9,19 @@ export const Login = () => {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     login(userName, password).then((response) => {
       const token = response.token;
-      localStorage.setItem("token", token);
-      navigate("/");
+      if (token) {
+        localStorage.setItem("token", token);
+        navigate("/");
+      } else {
+        setError(response.error);
+      }
     });
   }
 
@@ -49,6 +54,7 @@ export const Login = () => {
                 gap: 2,
               }}
             >
+          {error ? <p className={"error"}>{error}</p> : null}
           <FormControl>
             <FormLabel>
               Username
