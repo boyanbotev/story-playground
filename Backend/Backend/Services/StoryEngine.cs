@@ -14,7 +14,7 @@ public class StoryEngine : IStoryEngine
         this.LLMService = lLMService;
     }
 
-    public async Task<ProgressResponse> ProcessTurn(ProgressRequest progressRequest, Story story, string apiKey, CancellationToken cancellationToken)
+    public async Task<ProgressResponse> ProcessTurn(ProgressRequest progressRequest, Story story, CancellationToken cancellationToken)
     {
         var node = story.Nodes[progressRequest.NodeIndex];
 
@@ -24,7 +24,7 @@ public class StoryEngine : IStoryEngine
         if (node is StoryNode)
         {
             string prompt = promptBuilder.CreateStoryPrompt(progressRequest, node as StoryNode);
-            var response = await LLMService.Generate(prompt, apiKey, cancellationToken);
+            var response = await LLMService.Generate(prompt, cancellationToken);
             storyText = response.Text;
 
             if (response.Error != null) return LLMError(response.Error);
@@ -35,12 +35,12 @@ public class StoryEngine : IStoryEngine
         {
             QuestNode questNode = node as QuestNode;
             string prompt = promptBuilder.CreateQuestPrompt(progressRequest, questNode);
-            var response = await LLMService.Generate(prompt, apiKey, cancellationToken);
+            var response = await LLMService.Generate(prompt, cancellationToken);
             storyText = response.Text;
 
             if (response.Error != null) return LLMError(response.Error);
 
-            status = await GetQuestStatus(progressRequest, story, storyText, questNode, apiKey, cancellationToken);
+            status = await GetQuestStatus(progressRequest, story, storyText, questNode, cancellationToken);
         }
         status.StoryText = storyText;
 
@@ -77,9 +77,9 @@ public class StoryEngine : IStoryEngine
         }
     }
 
-    private async Task<ProgressResponse> GetQuestStatus(ProgressRequest progressRequest, Story story, string storyText, QuestNode questNode, string apiKey, CancellationToken cancellationToken)
+    private async Task<ProgressResponse> GetQuestStatus(ProgressRequest progressRequest, Story story, string storyText, QuestNode questNode, CancellationToken cancellationToken)
     {
-        ValidationResponse isGoalReached = await validationService.ValidateGoalReached(storyText, questNode.UserGoal, progressRequest.SummarySoFar, apiKey, cancellationToken);
+        ValidationResponse isGoalReached = await validationService.ValidateGoalReached(storyText, questNode.UserGoal, progressRequest.SummarySoFar, cancellationToken);
         if (isGoalReached.result.Equals(ValidationResult.Success))
         {
             var nextNodeStatus = GetNextNodeResponse(progressRequest, story);

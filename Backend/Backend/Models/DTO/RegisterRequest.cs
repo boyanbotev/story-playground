@@ -8,8 +8,6 @@ public class RegisterRequest
     public string Username { get; set; }
     [Required]
     public string Password { get; set; }
-    [Required]
-    public string ApiKey { get; set; }
 
     public RegisterRequest() { }
 }

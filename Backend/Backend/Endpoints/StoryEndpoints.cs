@@ -118,8 +118,7 @@ public static class StoryEndpoints
         app.MapPost("/progress", [Authorize] async (ILLMService lLMService, IGameService gameService, [FromBody] ProgressRequest progressRequest, Settings settings, ClaimsPrincipal user, CancellationToken cancellationToken) =>
         {
             var userId = user.FindFirstValue("UserId");
-            var apiKey = user.FindFirstValue("ApiKey");
-            return await gameService.ProgressStory(progressRequest, userId, apiKey, cancellationToken);
+            return await gameService.ProgressStory(progressRequest, userId, cancellationToken);
         });
     }
 }
